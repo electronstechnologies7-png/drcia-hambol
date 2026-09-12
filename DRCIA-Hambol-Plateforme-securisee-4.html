@@ -1,0 +1,2490 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRCIA Hambol — Plateforme Intégrée de Gestion et de Contrôle</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.2/dist/html2pdf.bundle.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green-dark:#1b5e20; --green-main:#2e7d32; --green-light:#4caf50; --green-pale:#e8f5e9;
+  --red-main:#c62828; --red-light:#ef5350;
+  --orange-main:#ef6c00; --orange-light:#ff9800;
+  --blue-main:#0b74c9; --blue-dark:#0b2239;
+  --white:#ffffff; --gray-light:#f5f5f5; --gray-mid:#9e9e9e; --gray-dark:#424242;
+  --shadow-3d:0 4px 6px -1px rgba(0,0,0,.15),0 2px 4px -2px rgba(0,0,0,.1),inset 0 1px 0 rgba(255,255,255,.9);
+  --shadow-3d-strong:0 8px 16px -4px rgba(0,0,0,.2),0 4px 8px -4px rgba(0,0,0,.15),inset 0 2px 0 rgba(255,255,255,.8),inset 0 -2px 4px rgba(0,0,0,.1);
+  --shadow-3d-input:0 3px 5px -1px rgba(0,0,0,.15),0 2px 3px -2px rgba(0,0,0,.1),inset 0 2px 4px rgba(0,0,0,.12);
+  --shadow-3d-pressed:0 1px 2px -1px rgba(0,0,0,.1),inset 0 2px 4px rgba(0,0,0,.2);
+  --border-3d:1px solid rgba(0,0,0,.08);
+}
+*{font-family:'Inter',sans-serif; box-sizing:border-box;}
+body{background:var(--gray-light); color:var(--green-dark); margin:0;}
+.page{display:none; min-height:100vh;}
+.page.active{display:block;}
+.login-bg{background:linear-gradient(135deg,var(--green-dark) 0%,var(--green-main) 50%,var(--green-light) 100%); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:1rem;}
+.login-card{background:var(--white); border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,1); border:1px solid rgba(255,255,255,.1); max-width:480px; width:100%; overflow:hidden;}
+.login-header{background:linear-gradient(135deg,var(--green-dark),var(--green-main)); color:#fff; padding:2rem 2.5rem; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,.15);}
+.login-header .republic{font-size:.7rem; letter-spacing:3px; text-transform:uppercase; opacity:.9;}
+.login-header .ministry{font-size:.82rem; font-weight:600; margin-top:4px; line-height:1.4;}
+.login-header .region{font-size:.75rem; margin-top:8px; opacity:.85; background:rgba(255,255,255,.15); display:inline-block; padding:4px 16px; border-radius:20px;}
+.input-3d{box-shadow:var(--shadow-3d-input); border:1px solid #d0d0d0; border-radius:10px; padding:12px 16px; background:linear-gradient(to bottom,#fff,#f9f9f9); transition:all .2s ease; width:100%; font-size:.95rem; outline:none;}
+.input-3d:focus{box-shadow:var(--shadow-3d-strong); border-color:var(--green-main); background:#fff;}
+select.input-3d{cursor:pointer;}
+.btn-3d{box-shadow:var(--shadow-3d); border-radius:10px; padding:12px 24px; font-weight:600; cursor:pointer; transition:all .15s ease; border:1px solid rgba(0,0,0,.08); font-size:.9rem;}
+.btn-3d:hover{box-shadow:var(--shadow-3d-strong); transform:translateY(-1px);}
+.btn-3d:active{box-shadow:var(--shadow-3d-pressed); transform:translateY(1px);}
+.btn-green{background:linear-gradient(to bottom,#43a047,var(--green-main)); color:#fff;}
+.btn-red{background:linear-gradient(to bottom,#e53935,var(--red-main)); color:#fff;}
+.btn-orange{background:linear-gradient(to bottom,#ff9800,var(--orange-main)); color:#fff;}
+.btn-blue{background:linear-gradient(to bottom,#1e88e5,var(--blue-main)); color:#fff;}
+.btn-gray{background:linear-gradient(to bottom,#e0e0e0,#bdbdbd); color:var(--gray-dark);}
+.navbar{background:linear-gradient(135deg,var(--green-dark),var(--green-main)); box-shadow:0 4px 12px rgba(0,0,0,.15); position:sticky; top:0; z-index:100;}
+.nav-brand{color:#fff; font-weight:700; font-size:.95rem; padding:.75rem 1.25rem; line-height:1.3;}
+.nav-brand small{display:block; font-weight:400; font-size:.7rem; opacity:.85;}
+.nav-link{color:rgba(255,255,255,.8); padding:.65rem 1rem; font-size:.8rem; font-weight:500; cursor:pointer; transition:all .2s; border-radius:8px; margin:.2rem;}
+.nav-link:hover{background:rgba(255,255,255,.15); color:#fff;}
+.nav-link.active{background:rgba(255,255,255,.2); color:#fff; font-weight:600; box-shadow:inset 0 2px 4px rgba(0,0,0,.15);}
+.stat-card{background:#fff; border-radius:14px; padding:1.25rem 1.5rem; box-shadow:var(--shadow-3d); border:var(--border-3d); transition:all .2s;}
+.stat-card:hover{box-shadow:var(--shadow-3d-strong); transform:translateY(-2px);}
+.stat-icon{width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; box-shadow:var(--shadow-3d);}
+.form-section{background:#fff; border-radius:14px; padding:1.75rem; box-shadow:var(--shadow-3d); border:var(--border-3d); margin-bottom:1.5rem;}
+.form-section h2{color:var(--green-dark); font-size:1.1rem; font-weight:700; padding-bottom:.7rem; border-bottom:3px solid var(--green-main); margin-bottom:1.4rem;}
+.form-label{display:block; font-weight:600; color:var(--green-dark); margin-bottom:6px; font-size:.82rem;}
+.form-label .required{color:var(--red-main);}
+.data-table{width:100%; border-collapse:separate; border-spacing:0; border-radius:12px; overflow:hidden; box-shadow:var(--shadow-3d);}
+.data-table thead th{background:linear-gradient(to bottom,var(--green-main),var(--green-dark)); color:#fff; padding:11px 12px; font-size:.75rem; font-weight:600; text-transform:uppercase; letter-spacing:.5px; white-space:nowrap;}
+.data-table tbody td{padding:9px 12px; font-size:.82rem; border-bottom:1px solid #eee; background:linear-gradient(to bottom,#fff,#fafafa); white-space:nowrap;}
+.data-table tbody tr:hover td{background:var(--green-pale);}
+.data-table tbody tr:last-child td{border-bottom:none;}
+#pv-template{position:absolute; left:-9999px; top:0;}
+.toast{position:fixed; top:20px; right:20px; padding:14px 22px; border-radius:12px; color:#fff; font-weight:600; font-size:.85rem; box-shadow:0 8px 24px rgba(0,0,0,.2); z-index:1000; animation:slideIn .3s ease,fadeOut .3s ease 2.7s; max-width:380px;}
+.toast-success{background:linear-gradient(135deg,#43a047,var(--green-dark));}
+.toast-error{background:linear-gradient(135deg,#e53935,var(--red-main));}
+.toast-info{background:linear-gradient(135deg,var(--orange-main),#e65100);}
+@keyframes slideIn{from{transform:translateX(100px);opacity:0;}to{transform:translateX(0);opacity:1;}}
+@keyframes fadeOut{from{opacity:1;}to{opacity:0;}}
+.modal-overlay{display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:200; align-items:center; justify-content:center; padding:16px;}
+.modal-overlay.show{display:flex;}
+.modal-content{background:#fff; border-radius:16px; padding:1.75rem; max-width:460px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.modal-content.wide{max-width:820px; max-height:90vh; overflow:auto;}
+.badge{display:inline-block; padding:3px 10px; border-radius:20px; font-size:.68rem; font-weight:600; text-transform:uppercase;}
+.section-title{color:var(--green-dark); font-size:1.25rem; font-weight:700; margin-bottom:1rem;}
+.chart-container{background:#fff; border-radius:14px; padding:1.4rem; box-shadow:var(--shadow-3d); border:var(--border-3d);}
+.search-bar{box-shadow:var(--shadow-3d-input); border-radius:10px; padding:10px 16px; border:1px solid #d0d0d0; width:100%; font-size:.88rem; background:linear-gradient(to bottom,#fff,#f9f9f9); outline:none;}
+.search-bar:focus{box-shadow:var(--shadow-3d-strong); border-color:var(--green-main);}
+.empty-state{text-align:center; padding:2.5rem; color:var(--gray-mid);}
+.empty-state .icon{font-size:2.6rem; margin-bottom:.75rem;}
+.tag-chip{display:inline-flex; align-items:center; gap:6px; background:var(--green-pale); color:var(--green-dark); padding:4px 10px; border-radius:20px; font-size:.75rem; margin:3px; font-weight:600;}
+.tag-chip button{border:0; background:none; color:var(--red-main); cursor:pointer; font-weight:800; font-size:.85rem;}
+.photo-frame{width:96px; height:96px; border:1px solid #d0d0d0; background:#fafafa repeating-linear-gradient(45deg,#f2f2f2,#f2f2f2 6px,#fafafa 6px,#fafafa 12px); display:flex; align-items:center; justify-content:center; overflow:hidden; border-radius:10px;}
+.photo-frame img{width:100%; height:100%; object-fit:cover;}
+.tabs{display:flex; gap:.4rem; flex-wrap:wrap; margin-bottom:1.25rem;}
+.tab-btn{padding:8px 16px; border-radius:9px; font-size:.8rem; font-weight:600; cursor:pointer; background:#fff; border:1px solid #ddd; color:#666;}
+.tab-btn.active{background:linear-gradient(to bottom,var(--green-main),var(--green-dark)); color:#fff; border-color:var(--green-dark);}
+@media (max-width:900px){
+  .stat-grid{grid-template-columns:repeat(2,1fr)!important;}
+  .form-grid{grid-template-columns:1fr!important;}
+  .chart-grid{grid-template-columns:1fr!important;}
+  .nav-links{flex-wrap:wrap; justify-content:center;}
+}
+.footer-note{text-align:center; color:#999; font-size:.72rem; padding:1.5rem 0;}
+.subscription-banner{display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; padding:10px 20px; font-size:.82rem; font-weight:600;}
+.subscription-banner.trial{background:linear-gradient(90deg,#fff8e1,#fff3cd); color:#8a6300; border-bottom:1px solid #f0d878;}
+.subscription-banner.active{background:linear-gradient(90deg,#e8f5e9,#dcf3de); color:#1b5e20; border-bottom:1px solid #b7e0ba;}
+.paywall-bg{background:linear-gradient(135deg,var(--green-dark) 0%,var(--green-main) 50%,var(--green-light) 100%); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:1.5rem;}
+.paywall-card{background:#fff; border-radius:18px; box-shadow:0 20px 60px rgba(0,0,0,.3); max-width:640px; width:100%; overflow:hidden;}
+.paywall-header{background:linear-gradient(135deg,var(--green-dark),var(--green-main)); color:#fff; padding:1.8rem 2rem; text-align:center;}
+.price-tag{display:inline-block; background:var(--green-pale); color:var(--green-dark); font-size:1.7rem; font-weight:800; padding:10px 26px; border-radius:14px; box-shadow:var(--shadow-3d);}
+.payment-method-card{border:1px solid #e0e0e0; border-radius:12px; padding:1rem 1.2rem; display:flex; align-items:center; gap:12px; background:linear-gradient(to bottom,#fff,#fafafa); box-shadow:var(--shadow-3d);}
+.payment-method-card .logo{width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1rem; color:#fff;}
+</style>
+</head>
+<body>
+<div id="toast-container"></div>
+
+<!-- ============ MODAL: MOT DE PASSE OUBLIE (étape 1 : matricule) ============ -->
+<div class="modal-overlay" id="forgot-modal">
+  <div class="modal-content">
+    <h3 style="color:var(--green-dark); font-size:1.05rem; font-weight:700; margin-bottom:.5rem;">🔑 Récupération du mot de passe</h3>
+    <p style="font-size:.83rem; color:#666; margin-bottom:1.25rem;">Entrez votre matricule. Un code de vérification sera envoyé au numéro de téléphone enregistré sur votre compte.</p>
+    <div id="forgot-error" style="display:none; background:#ffebee; color:var(--red-main); padding:8px 12px; border-radius:8px; font-size:.78rem; margin-bottom:1rem;"></div>
+    <input type="text" id="forgot-username" class="input-3d" placeholder="Votre matricule" style="margin-bottom:1rem;">
+    <div style="display:flex; gap:.7rem;">
+      <button onclick="submitForgotPassword()" class="btn-3d btn-green" style="flex:1;">Envoyer le code</button>
+      <button onclick="closeForgotModal()" class="btn-3d btn-gray">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: MOT DE PASSE OUBLIE (étape 2 : code + nouveau mot de passe) ============ -->
+<div class="modal-overlay" id="reset-modal">
+  <div class="modal-content">
+    <h3 style="color:var(--green-dark); font-size:1.05rem; font-weight:700; margin-bottom:.5rem;">📱 Réinitialisation du mot de passe</h3>
+    <div id="reset-demo-note" style="background:#fff3e0; border:1px solid #ffcc80; color:#8a5300; border-radius:10px; padding:10px 14px; font-size:.76rem; margin-bottom:1rem;"></div>
+    <div id="reset-error" style="display:none; background:#ffebee; color:var(--red-main); padding:8px 12px; border-radius:8px; font-size:.78rem; margin-bottom:1rem;"></div>
+    <input type="text" id="reset-code" class="input-3d" placeholder="Code reçu (6 chiffres)" style="margin-bottom:.8rem; text-align:center; letter-spacing:4px;" maxlength="6">
+    <input type="password" id="reset-password" class="input-3d" placeholder="Nouveau mot de passe (8 car. min.)" style="margin-bottom:.8rem;">
+    <input type="password" id="reset-password2" class="input-3d" placeholder="Confirmer le nouveau mot de passe" style="margin-bottom:1rem;">
+    <div style="display:flex; gap:.7rem;">
+      <button onclick="submitPasswordReset()" class="btn-3d btn-green" style="flex:1;">Réinitialiser</button>
+      <button onclick="closeResetModal()" class="btn-3d btn-gray">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL GENERIQUE (missions / opérateurs avancés) ============ -->
+<div class="modal-overlay" id="generic-modal">
+  <div class="modal-content wide">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+      <h3 id="generic-modal-title" style="color:var(--green-dark); font-size:1.1rem; font-weight:700;"></h3>
+      <button onclick="closeGenericModal()" class="btn-3d btn-gray" style="padding:6px 12px;">✕</button>
+    </div>
+    <div id="generic-modal-body"></div>
+  </div>
+</div>
+
+<!-- ============ GABARIT PV (masqué, utilisé pour le PDF) ============ -->
+<div id="pv-template">
+  <div id="pv-content" style="width:210mm; padding:15mm 20mm; font-family:'Times New Roman',serif; background:#fff; color:#000; font-size:12pt;">
+    <div style="text-align:center; border-bottom:3px double #1b5e20; padding-bottom:15px; margin-bottom:20px;">
+      <div style="font-size:10pt; letter-spacing:2px; color:#333;">RÉPUBLIQUE DE CÔTE D'IVOIRE</div>
+      <div style="font-size:11pt; color:#333;">Union — Discipline — Travail</div>
+      <hr style="border:1px solid #1b5e20; margin:10px 0;">
+      <div style="font-size:13pt; font-weight:bold; color:#1b5e20;">MINISTÈRE DU COMMERCE, DE L'INDUSTRIE ET DE L'ARTISANAT</div>
+      <div style="font-size:11pt; color:#333;">Direction Régionale du Commerce, de l'Industrie et de l'Artisanat — Région du Hambol</div>
+      <div style="font-size:10pt; color:#666;">Service de Contrôle et d'Inspection Économique</div>
+    </div>
+    <div style="text-align:center; margin-bottom:22px;">
+      <div style="font-size:15pt; font-weight:bold; color:#1b5e20; text-decoration:underline;">PROCÈS-VERBAL DE MISSION DE CONTRÔLE</div>
+      <div style="font-size:11pt; color:#333; margin-top:5px;" id="pv-number"></div>
+    </div>
+    <div style="line-height:1.75;">
+      <p>Nous, soussignés, agent(s) assermentés du service de contrôle de la Direction Régionale du Commerce, de l'Industrie et de l'Artisanat du Hambol,</p>
+      <p>Le présent procès-verbal a été établi ce jour pour constater les faits suivants :</p>
+      <table style="width:100%; border-collapse:collapse; margin:14px 0; font-size:10.5pt;" cellpadding="7" cellspacing="0">
+        <tr><td style="width:35%; font-weight:bold; border:1px solid #333; padding:7px; background:#f5f5f5;">Opérateur économique</td><td style="border:1px solid #333; padding:7px;" id="pv-nom"></td></tr>
+        <tr><td style="font-weight:bold; border:1px solid #333; padding:7px; background:#f5f5f5;">Activité menée</td><td style="border:1px solid #333; padding:7px;" id="pv-activite"></td></tr>
+        <tr><td style="font-weight:bold; border:1px solid #333; padding:7px; background:#f5f5f5;">Département / Localité</td><td style="border:1px solid #333; padding:7px;" id="pv-lieu"></td></tr>
+        <tr><td style="font-weight:bold; border:1px solid #333; padding:7px; background:#f5f5f5;">Date et heure</td><td style="border:1px solid #333; padding:7px;" id="pv-date"></td></tr>
+        <tr><td style="font-weight:bold; border:1px solid #333; padding:7px; background:#f5f5f5;">Motif du contrôle</td><td style="border:1px solid #333; padding:7px;" id="pv-motif"></td></tr>
+        <tr><td style="font-weight:bold; border:1px solid #333; padding:7px; background:#f5f5f5;">Chef de mission</td><td style="border:1px solid #333; padding:7px;" id="pv-chef"></td></tr>
+        <tr><td style="font-weight:bold; border:1px solid #333; padding:7px; background:#f5f5f5;">Quantité saisie</td><td style="border:1px solid #333; padding:7px;" id="pv-quantite"></td></tr>
+        <tr><td style="font-weight:bold; border:1px solid #333; padding:7px; background:#f5f5f5; font-size:11.5pt;">Montant des saisies</td><td style="border:1px solid #333; padding:7px; font-weight:bold; font-size:11.5pt;" id="pv-montant"></td></tr>
+        <tr><td style="font-weight:bold; border:1px solid #333; padding:7px; background:#f5f5f5;">Nombre de convocations</td><td style="border:1px solid #333; padding:7px;" id="pv-conv"></td></tr>
+        <tr><td style="font-weight:bold; border:1px solid #333; padding:7px; background:#f5f5f5;">Statut du dossier</td><td style="border:1px solid #333; padding:7px;" id="pv-statut"></td></tr>
+      </table>
+      <p style="margin-top:20px;"><strong>OBSERVATIONS :</strong> <span id="pv-obs"></span></p>
+      <p style="margin-top:15px;">Conformément aux dispositions légales et réglementaires en vigueur, les faits ci-dessus ont été constatés et consignés au présent procès-verbal, remis à l'opérateur contre décharge, un exemplaire restant au dossier du service.</p>
+      <div style="margin-top:35px; display:flex; justify-content:space-between;">
+        <div style="text-align:center;">
+          <div style="font-weight:bold; margin-bottom:35px;">L'Opérateur économique</div>
+          <div style="border-top:1px solid #000; width:150px; margin:0 auto; padding-top:5px; font-size:9.5pt;">Signature et cachet</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-weight:bold; margin-bottom:35px;">Le Chef de mission</div>
+          <div style="border-top:1px solid #000; width:150px; margin:0 auto; padding-top:5px; font-size:9.5pt;">Signature et cachet</div>
+        </div>
+      </div>
+      <div style="margin-top:35px; font-size:8.5pt; color:#666; text-align:center; border-top:1px solid #ccc; padding-top:10px;">
+        Direction Régionale du Commerce, de l'Industrie et de l'Artisanat — Région du Hambol<br>
+        Document généré informatiquement — Plateforme Intégrée DRCIA Hambol v1.0
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== PAGE 1 : CONNEXION ==================== -->
+<div class="page active" id="page-login">
+  <div class="login-bg">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="republic">République de Côte d'Ivoire</div>
+        <div style="font-size:.65rem; letter-spacing:2px; opacity:.8;">Union — Discipline — Travail</div>
+        <div class="ministry">Direction Régionale du Commerce, de l'Industrie<br>et de l'Artisanat — Région du Hambol</div>
+        <div class="region">📍 Katiola · Niakaramandougou · Dabakala · Fronan</div>
+        <div style="margin-top:12px; font-size:.75rem; opacity:.7;">Plateforme Intégrée de Gestion et de Contrôle</div>
+      </div>
+      <div style="padding:1.85rem 2.3rem;">
+        <div style="text-align:center; margin-bottom:1.4rem;">
+          <div style="font-size:2.2rem;">🔐</div>
+          <h2 style="font-size:1.15rem; color:var(--green-dark); font-weight:700; margin-top:6px;">Connexion au système</h2>
+          <p style="font-size:.8rem; color:#888; margin-top:4px;">Accédez à votre espace sécurisé</p>
+        </div>
+        <div id="login-error" style="display:none; background:#ffebee; color:var(--red-main); padding:10px 14px; border-radius:8px; font-size:.8rem; margin-bottom:1rem; border:1px solid #ffcdd2;"></div>
+        <div style="margin-bottom:.9rem;">
+          <label class="form-label">Identifiant <span class="required">*</span></label>
+          <input type="text" id="login-username" class="input-3d" placeholder="Entrez votre identifiant" autocomplete="off">
+        </div>
+        <div style="margin-bottom:1.3rem;">
+          <label class="form-label">Mot de passe <span class="required">*</span></label>
+          <input type="password" id="login-password" class="input-3d" placeholder="Entrez votre mot de passe" autocomplete="off">
+        </div>
+        <button onclick="login()" id="login-submit-btn" class="btn-3d btn-green" style="width:100%;">Se connecter</button>
+        <div style="text-align:center; margin-top:1rem; display:flex; justify-content:center; gap:1.2rem; flex-wrap:wrap;">
+          <a href="#" onclick="openForgotModal(); return false;" style="color:var(--orange-main); font-size:.8rem; font-weight:500; text-decoration:none;">🔑 Mot de passe oublié ?</a>
+          <a href="#" onclick="goToRegisterPage(); return false;" style="color:var(--green-dark); font-size:.8rem; font-weight:500; text-decoration:none;">📝 Créer un compte</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== PAGE INSCRIPTION ==================== -->
+<div class="page" id="page-register">
+  <div class="login-bg">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="republic">République de Côte d'Ivoire</div>
+        <div style="font-size:.65rem; letter-spacing:2px; opacity:.8;">Union — Discipline — Travail</div>
+        <div class="ministry">Direction Régionale du Commerce, de l'Industrie<br>et de l'Artisanat — Région du Hambol</div>
+        <div style="margin-top:12px; font-size:.75rem; opacity:.7;">Plateforme Intégrée de Gestion et de Contrôle</div>
+      </div>
+      <div style="padding:1.85rem 2.3rem;">
+        <div style="text-align:center; margin-bottom:1.2rem;">
+          <div style="font-size:2.2rem;">📝</div>
+          <h2 style="font-size:1.15rem; color:var(--green-dark); font-weight:700; margin-top:6px;">Créer un compte</h2>
+          <p style="font-size:.8rem; color:#888; margin-top:4px;">Un code de confirmation sera envoyé à votre téléphone pour valider votre inscription.</p>
+        </div>
+        <div id="register-error" style="display:none; background:#ffebee; color:var(--red-main); padding:10px 14px; border-radius:8px; font-size:.8rem; margin-bottom:1rem; border:1px solid #ffcdd2;"></div>
+        <div class="form-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:.9rem;">
+          <div><label class="form-label">Nom <span class="required">*</span></label><input type="text" id="register-nom" class="input-3d" placeholder="Nom" autocomplete="off"></div>
+          <div><label class="form-label">Prénom <span class="required">*</span></label><input type="text" id="register-prenom" class="input-3d" placeholder="Prénom" autocomplete="off"></div>
+          <div><label class="form-label">Téléphone <span class="required">*</span></label><input type="tel" id="register-telephone" class="input-3d" placeholder="07 XX XX XX XX" autocomplete="off"></div>
+          <div><label class="form-label">Matricule <span class="required">*</span></label><input type="text" id="register-matricule" class="input-3d" placeholder="Ex : 344 263 R" autocomplete="off"></div>
+          <div style="grid-column:span 2;">
+            <label class="form-label">Emploi <span class="required">*</span></label>
+            <select id="register-emploi" class="input-3d">
+              <option value="">— Sélectionnez votre fonction —</option>
+              <option value="directeur">Directeur</option>
+              <option value="sous-directeur">Sous-directeur</option>
+              <option value="inspecteur">Inspecteur</option>
+              <option value="informaticien">Informaticien</option>
+              <option value="agent de saisie">Agent de saisie</option>
+              <option value="contrôleur">Contrôleur</option>
+            </select>
+          </div>
+          <div><label class="form-label">Mot de passe <span class="required">*</span></label><input type="password" id="register-password" class="input-3d" placeholder="8 caractères minimum" autocomplete="off"></div>
+          <div><label class="form-label">Confirmer <span class="required">*</span></label><input type="password" id="register-password2" class="input-3d" placeholder="Retapez le mot de passe" autocomplete="off"></div>
+        </div>
+        <button onclick="registerAccount()" class="btn-3d btn-green" style="width:100%; margin-top:1.2rem;">Créer mon compte</button>
+        <div style="text-align:center; margin-top:1rem;">
+          <a href="#" onclick="goToLoginPage(); return false;" style="color:var(--gray-mid); font-size:.8rem; text-decoration:none;">⬅ Retour à la connexion</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== PAGE VERIFICATION DU CODE (INSCRIPTION) ==================== -->
+<div class="page" id="page-verify">
+  <div class="login-bg">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="republic">République de Côte d'Ivoire</div>
+        <div style="font-size:.65rem; letter-spacing:2px; opacity:.8;">Union — Discipline — Travail</div>
+        <div class="ministry">Direction Régionale du Commerce, de l'Industrie<br>et de l'Artisanat — Région du Hambol</div>
+      </div>
+      <div style="padding:1.85rem 2.3rem;">
+        <div style="text-align:center; margin-bottom:1.2rem;">
+          <div style="font-size:2.2rem;">📱</div>
+          <h2 style="font-size:1.15rem; color:var(--green-dark); font-weight:700; margin-top:6px;">Vérification du téléphone</h2>
+          <p style="font-size:.8rem; color:#888; margin-top:4px;">Entrez le code à 6 chiffres envoyé au <strong id="verify-phone-display"></strong>.</p>
+        </div>
+        <div id="verify-demo-note" style="background:#fff3e0; border:1px solid #ffcc80; color:#8a5300; border-radius:10px; padding:10px 14px; font-size:.78rem; margin-bottom:1rem;"></div>
+        <div id="verify-error" style="display:none; background:#ffebee; color:var(--red-main); padding:10px 14px; border-radius:8px; font-size:.8rem; margin-bottom:1rem; border:1px solid #ffcdd2;"></div>
+        <div style="margin-bottom:1.3rem;">
+          <label class="form-label">Code de vérification <span class="required">*</span></label>
+          <input type="text" id="verify-code" class="input-3d" placeholder="123456" maxlength="6" style="text-align:center; letter-spacing:6px; font-size:1.2rem;">
+        </div>
+        <button onclick="verifyRegistrationCode()" class="btn-3d btn-green" style="width:100%;">Valider mon compte</button>
+        <div style="text-align:center; margin-top:1rem; display:flex; justify-content:center; gap:1.2rem;">
+          <a href="#" onclick="resendRegistrationCode(); return false;" style="color:var(--orange-main); font-size:.8rem; font-weight:500; text-decoration:none;">🔄 Renvoyer le code</a>
+          <a href="#" onclick="goToLoginPage(); return false;" style="color:var(--gray-mid); font-size:.8rem; text-decoration:none;">⬅ Annuler</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== PAGE PAIEMENT : ABONNEMENT REQUIS ==================== -->
+<div class="page" id="page-paywall">
+  <div class="login-bg" style="background:linear-gradient(135deg,#b71c1c 0%,var(--orange-main) 55%,var(--green-dark) 100%);">
+    <div class="login-card" style="max-width:520px;">
+      <div class="login-header" style="background:linear-gradient(135deg,var(--red-main),var(--orange-main));">
+        <div class="republic">DRCIA Hambol — Plateforme Intégrée</div>
+        <div class="ministry" id="paywall-title">Période d'essai gratuit terminée</div>
+      </div>
+      <div style="padding:1.9rem 2.2rem;">
+        <p id="paywall-status" style="text-align:center; font-size:.85rem; color:#555; margin-bottom:1.2rem;"></p>
+        <div style="background:var(--green-pale); border-radius:14px; padding:1.1rem; text-align:center; margin-bottom:1.2rem;">
+          <div style="font-size:.72rem; text-transform:uppercase; letter-spacing:1px; color:var(--green-dark);">Abonnement plateforme</div>
+          <div style="font-size:1.9rem; font-weight:800; color:var(--green-dark);">5 000 FCFA <span style="font-size:.85rem; font-weight:500;">/ 2 mois</span></div>
+          <div style="font-size:.72rem; color:#666; margin-top:4px;">Après 30 jours d'essai gratuit — renouvelable tous les 2 mois</div>
+        </div>
+        <div style="margin-bottom:.8rem;">
+          <div class="form-label">💙 Paiement Wave</div>
+          <div style="background:#fff; border:1px solid #eee; border-radius:10px; padding:10px 14px; font-size:.9rem;">📱 <strong>07 49 95 08 06</strong> <span style="color:#888;">— Kouame Sidoine Prince Romaric</span></div>
+        </div>
+        <div style="margin-bottom:1.1rem;">
+          <div class="form-label">🟠 Paiement Orange Money CI</div>
+          <div style="background:#fff; border:1px solid #eee; border-radius:10px; padding:10px 14px; font-size:.9rem;">📱 <strong>07 49 95 08 06</strong> <span style="color:#888;">— Kouame Sidoine Prince Romaric</span></div>
+        </div>
+        <p style="font-size:.75rem; color:#888; margin-bottom:1.1rem;">Technicien Supérieur de l'Informatique. Après paiement, envoyez la capture de la transaction au numéro ci-dessus pour recevoir votre code d'activation valable 2 mois.</p>
+        <div id="paywall-error" style="display:none; background:#ffebee; color:var(--red-main); padding:10px 14px; border-radius:8px; font-size:.8rem; margin-bottom:1rem;"></div>
+        <label class="form-label">Code d'activation</label>
+        <input type="text" id="paywall-code" class="input-3d" placeholder="Entrez le code reçu après paiement" style="margin-bottom:1rem;">
+        <button onclick="activateLicence('paywall-code','paywall-error')" class="btn-3d btn-green" style="width:100%;">✅ Activer mon abonnement</button>
+        <div style="text-align:center; margin-top:1rem;">
+          <a href="#" onclick="logoutToLogin(); return false;" style="color:var(--gray-mid); font-size:.75rem; text-decoration:none;">⬅ Revenir à la connexion</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== PAGE 2 : APPLICATION ==================== -->
+<div class="page" id="page-dashboard">
+  <nav class="navbar">
+    <div style="max-width:1500px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap;">
+      <div class="nav-brand">🇨🇮 DRCIA Hambol <small>Plateforme intégrée de gestion et de contrôle</small></div>
+      <div class="nav-links" style="display:flex; align-items:center; gap:0;">
+        <div class="nav-link active" onclick="showSection('dashboard-home')" data-section="dashboard-home">📊 Tableau de bord</div>
+        <div class="nav-link" onclick="showSection('section-operateurs')" data-section="section-operateurs">🧑‍💼 Opérateurs</div>
+        <div class="nav-link" onclick="showSection('section-missions')" data-section="section-missions">📋 Missions &amp; PV</div>
+        <div class="nav-link" onclick="showSection('section-bilan')" data-section="section-bilan">📈 Bilan annuel</div>
+        <div class="nav-link" onclick="showSection('section-indicateurs')" data-section="section-indicateurs">🗂️ Indicateurs DR</div>
+        <div class="nav-link" id="nav-utilisateurs" onclick="showSection('section-utilisateurs')" data-section="section-utilisateurs" style="display:none;">👥 Utilisateurs</div>
+        <div class="nav-link" onclick="showSection('section-parametres')" data-section="section-parametres">⚙️ Paramètres</div>
+        <div class="nav-link" onclick="logout()" style="border-left:1px solid rgba(255,255,255,.2); margin-left:.4rem; padding-left:1.2rem;">🚪 <span id="who-label"></span></div>
+      </div>
+    </div>
+  </nav>
+  <div id="trial-banner" style="display:none; background:linear-gradient(135deg,var(--orange-main),#e65100); color:#fff; text-align:center; padding:8px 14px; font-size:.8rem; font-weight:600;"></div>
+  <div id="scope-banner" style="display:none; background:var(--green-pale); color:var(--green-dark); text-align:center; padding:7px 14px; font-size:.78rem; font-weight:600; border-bottom:1px solid #b7e0ba;"></div>
+
+  <div style="max-width:1500px; margin:0 auto; padding:1.4rem;">
+
+    <!-- ===== TABLEAU DE BORD EXECUTIF ===== -->
+    <div id="dashboard-home" class="section active-section">
+      <h1 class="section-title" style="margin-bottom:.4rem;">Tableau de Bord Exécutif</h1>
+      <p style="color:#666; font-size:.88rem; margin-bottom:1.4rem;">Vue consolidée des opérateurs économiques et des activités de contrôle — Région du Hambol</p>
+
+      <div class="stat-grid" style="display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:1.4rem;">
+        <div class="stat-card"><div style="display:flex; align-items:center; justify-content:space-between;">
+          <div><div style="font-size:.72rem; color:#888; text-transform:uppercase; letter-spacing:1px;">Opérateurs enregistrés</div>
+          <div style="font-size:1.9rem; font-weight:800; color:var(--green-main);" id="kpi-total-op">0</div></div>
+          <div class="stat-icon" style="background:linear-gradient(135deg,#43a047,#1b5e20); color:#fff;">🧑‍💼</div></div></div>
+        <div class="stat-card"><div style="display:flex; align-items:center; justify-content:space-between;">
+          <div><div style="font-size:.72rem; color:#888; text-transform:uppercase; letter-spacing:1px;">Part Ivoiriens</div>
+          <div style="font-size:1.9rem; font-weight:800; color:var(--blue-main);" id="kpi-pct-ivoirien">0%</div></div>
+          <div class="stat-icon" style="background:linear-gradient(135deg,#1e88e5,#0b2239); color:#fff;">🇨🇮</div></div></div>
+        <div class="stat-card"><div style="display:flex; align-items:center; justify-content:space-between;">
+          <div><div style="font-size:.72rem; color:#888; text-transform:uppercase; letter-spacing:1px;">Part Non Ivoiriens</div>
+          <div style="font-size:1.9rem; font-weight:800; color:var(--orange-main);" id="kpi-pct-non-ivoirien">0%</div></div>
+          <div class="stat-icon" style="background:linear-gradient(135deg,#ff9800,#e65100); color:#fff;">🌍</div></div></div>
+        <div class="stat-card"><div style="display:flex; align-items:center; justify-content:space-between;">
+          <div><div style="font-size:.72rem; color:#888; text-transform:uppercase; letter-spacing:1px;">Département le plus actif</div>
+          <div style="font-size:1.25rem; font-weight:800; color:var(--red-main);" id="kpi-dept-actif">—</div></div>
+          <div class="stat-icon" style="background:linear-gradient(135deg,#e53935,#b71c1c); color:#fff;">📍</div></div></div>
+      </div>
+
+      <div class="chart-grid" style="display:grid; grid-template-columns:1.4fr 1fr; gap:1.4rem; margin-bottom:1.4rem;">
+        <div class="chart-container">
+          <h3 style="color:var(--green-dark); font-size:.95rem; font-weight:700; margin-bottom:1rem;">1️⃣ Répartition territoriale par département et nationalité</h3>
+          <canvas id="chart-dept" height="220"></canvas>
+        </div>
+        <div class="chart-container">
+          <h3 style="color:var(--green-dark); font-size:.95rem; font-weight:700; margin-bottom:1rem;">Ratio nationaux / non-nationaux</h3>
+          <canvas id="chart-ratio" height="220"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:1.4rem; margin-bottom:1.4rem;">
+        <div class="chart-container">
+          <h3 style="color:var(--green-dark); font-size:.95rem; font-weight:700; margin-bottom:1rem;">2️⃣ Volume d'activité par secteur (20 secteurs de référence)</h3>
+          <canvas id="chart-secteur" height="260"></canvas>
+        </div>
+        <div class="chart-container">
+          <h3 style="color:var(--green-dark); font-size:.95rem; font-weight:700; margin-bottom:1rem;">Indicateurs de disparité territoriale (% non-nationaux par département)</h3>
+          <canvas id="chart-disparite" height="260"></canvas>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h2>3️⃣ Contrôle de cohérence et d'audit</h2>
+        <div style="overflow-x:auto;" id="coherence-table-container"></div>
+      </div>
+    </div>
+
+    <!-- ===== OPERATEURS ECONOMIQUES ===== -->
+    <div id="section-operateurs" class="section" style="display:none;">
+      <h1 class="section-title" style="margin-bottom:.4rem;">🧑‍💼 Opérateurs Économiques</h1>
+      <p style="color:#666; font-size:.88rem; margin-bottom:1.4rem;">Référentiel des opérateurs économiques enregistrés dans la région du Hambol</p>
+
+      <div class="form-section">
+        <h2 id="op-form-title">📝 Nouvel opérateur</h2>
+        <div class="form-grid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:1rem;">
+          <div><label class="form-label">N° CNI <span class="required">*</span></label><input type="text" id="op-numcni" class="input-3d" placeholder="CI0123456789"></div>
+          <div><label class="form-label">Nom <span class="required">*</span></label><input type="text" id="op-nom" class="input-3d"></div>
+          <div><label class="form-label">Prénom <span class="required">*</span></label><input type="text" id="op-prenom" class="input-3d"></div>
+          <div><label class="form-label">Sexe</label><select id="op-sexe" class="input-3d"><option>Homme</option><option>Femme</option></select></div>
+          <div><label class="form-label">Nationalité <span class="required">*</span></label><select id="op-nationalite" class="input-3d"><option>Ivoirien</option><option>Non Ivoirien</option></select></div>
+          <div><label class="form-label">Date de naissance</label><input type="date" id="op-datenaissance" class="input-3d"></div>
+          <div><label class="form-label">Téléphone</label><input type="tel" id="op-telephone" class="input-3d" placeholder="07 XX XX XX XX"></div>
+          <div><label class="form-label">Département <span class="required">*</span></label><select id="op-departement" class="input-3d"></select></div>
+          <div><label class="form-label">Localité / Quartier</label><input type="text" id="op-localite" class="input-3d"></div>
+          <div style="grid-column:span 2;"><label class="form-label">Activité menée <span class="required">*</span></label><select id="op-activite" class="input-3d"></select></div>
+          <div>
+            <label class="form-label">Photo</label>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div class="photo-frame" id="op-photo-frame"><span style="font-size:.65rem; color:#999; text-align:center;">Aperçu</span></div>
+              <input type="file" accept="image/*" id="op-photo-file" style="font-size:.72rem;">
+            </div>
+          </div>
+        </div>
+        <div style="display:flex; gap:1rem; flex-wrap:wrap; margin-top:1.2rem;">
+          <button onclick="saveOperateur()" class="btn-3d btn-green" style="flex:1; min-width:200px;">✅ Enregistrer l'opérateur</button>
+          <button onclick="clearOperateurForm()" class="btn-3d btn-gray" style="min-width:140px;">🔄 Réinitialiser</button>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div style="display:flex; gap:1rem; margin-bottom:1rem; flex-wrap:wrap;">
+          <input type="text" id="search-op" class="search-bar" placeholder="🔍 Rechercher par nom, N° CNI, activité, localité..." oninput="renderOperateurs()" style="flex:1; min-width:240px;">
+          <select id="filter-op-dept" class="search-bar" onchange="renderOperateurs()" style="width:auto; min-width:180px;"><option value="">Tous les départements</option></select>
+          <button onclick="exportOperateursCSV()" class="btn-3d btn-blue" style="min-width:150px;">📥 Excel (CSV)</button>
+          <button onclick="exportSectorPDF('op-table-container','Répertoire des Opérateurs Économiques','operateurs')" class="btn-3d btn-red" style="min-width:150px;">🖨️ Imprimer en PDF</button>
+        </div>
+        <div style="overflow-x:auto;" id="op-table-container"></div>
+        <div style="font-size:.72rem; color:#999; margin-top:.6rem;" id="op-count-tag"></div>
+      </div>
+    </div>
+
+    <!-- ===== MISSIONS & PROCES-VERBAUX ===== -->
+    <div id="section-missions" class="section" style="display:none;">
+      <h1 class="section-title" style="margin-bottom:.4rem;">📋 Missions de Contrôle &amp; Procès-Verbaux</h1>
+      <p style="color:#666; font-size:.88rem; margin-bottom:1.4rem;">Planification des missions, saisies, PV et convocations — génération de PV au format PDF</p>
+
+      <div class="form-section">
+        <h2 id="mission-form-title">📝 Nouvelle mission / procès-verbal</h2>
+        <div class="form-grid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:1rem;">
+          <div><label class="form-label">Date de contrôle <span class="required">*</span></label><input type="date" id="ms-date" class="input-3d"></div>
+          <div><label class="form-label">Heure</label><input type="time" id="ms-heure" class="input-3d"></div>
+          <div><label class="form-label">Chef de mission</label><select id="ms-chef" class="input-3d"></select></div>
+          <div style="grid-column:span 2;"><label class="form-label">Opérateur contrôlé <span class="required">*</span></label><input type="text" id="ms-operateur" class="input-3d" placeholder="Nom Prénom de l'opérateur"></div>
+          <div><label class="form-label">Produits / activité</label><input type="text" id="ms-produits" class="input-3d" placeholder="Désignation des produits ou activité"></div>
+          <div><label class="form-label">Département <span class="required">*</span></label><select id="ms-departement" class="input-3d"></select></div>
+          <div><label class="form-label">Localité / lieu du contrôle</label><input type="text" id="ms-lieu" class="input-3d"></div>
+          <div><label class="form-label">Nb contrôleurs présents</label><input type="number" min="0" id="ms-controleurs" class="input-3d" value="1"></div>
+          <div style="grid-column:span 2;"><label class="form-label">Motif du contrôle <span class="required">*</span></label><select id="ms-motif" class="input-3d"></select></div>
+          <div><label class="form-label">Quantité saisie</label><input type="number" min="0" id="ms-quantite" class="input-3d" placeholder="0" oninput="autoCalcMontant()"></div>
+          <div><label class="form-label">Prix unitaire (FCFA)</label><input type="number" min="0" id="ms-prix" class="input-3d" placeholder="0" oninput="autoCalcMontant()"></div>
+          <div><label class="form-label">Montant total (FCFA)</label><input type="text" id="ms-montant" class="input-3d" placeholder="Calculé automatiquement" readonly style="background:#eee; color:#888;"></div>
+          <div><label class="form-label">Nb de PV dressés</label><input type="number" min="0" id="ms-nbpv" class="input-3d" value="1"></div>
+          <div><label class="form-label">Nb de convocations</label><input type="number" min="0" id="ms-nbconv" class="input-3d" value="0"></div>
+          <div><label class="form-label">Statut du dossier</label><select id="ms-statut" class="input-3d"></select></div>
+          <div style="grid-column:span 3;"><label class="form-label">Observations</label><input type="text" id="ms-observations" class="input-3d"></div>
+        </div>
+        <div style="display:flex; gap:1rem; flex-wrap:wrap; margin-top:1.2rem;">
+          <button onclick="saveMission()" class="btn-3d btn-green" style="flex:1; min-width:200px;">✅ Enregistrer la mission</button>
+          <button onclick="clearMissionForm()" class="btn-3d btn-gray" style="min-width:140px;">🔄 Réinitialiser</button>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div style="display:flex; gap:1rem; margin-bottom:1rem; flex-wrap:wrap;">
+          <input type="text" id="search-ms" class="search-bar" placeholder="🔍 Rechercher par opérateur, lieu, motif, N°..." oninput="renderMissions()" style="flex:1; min-width:240px;">
+          <select id="filter-ms-statut" class="search-bar" onchange="renderMissions()" style="width:auto; min-width:170px;"><option value="">Tous statuts</option></select>
+          <button onclick="exportMissionsCSV()" class="btn-3d btn-blue" style="min-width:150px;">📥 Excel (CSV)</button>
+          <button onclick="exportSectorPDF('ms-table-container','Missions de Contrôle &amp; Procès-Verbaux','missions')" class="btn-3d btn-red" style="min-width:150px;">🖨️ Imprimer en PDF</button>
+        </div>
+        <div style="overflow-x:auto;" id="ms-table-container"></div>
+      </div>
+    </div>
+
+    <!-- ===== BILAN ANNUEL ===== -->
+    <div id="section-bilan" class="section" style="display:none;">
+      <h1 class="section-title" style="margin-bottom:.4rem;">📈 Bilan Annuel des Contrôles</h1>
+      <p style="color:#666; font-size:.88rem; margin-bottom:1.4rem;">Analyse statistique et graphiques des missions de contrôle</p>
+
+      <div class="form-section" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem;">
+        <div><label class="form-label">Année de référence</label><select id="bilan-annee" class="input-3d" onchange="updateBilan()" style="width:auto;"></select></div>
+        <button onclick="updateBilan()" class="btn-3d btn-green">🔄 Actualiser les graphiques</button>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:1.4rem; margin-bottom:1.4rem;" class="chart-grid">
+        <div class="chart-container"><h3 style="color:var(--green-dark); font-size:.95rem; font-weight:700; margin-bottom:1rem;">📊 Missions par mois</h3><canvas id="chart-mensuel"></canvas></div>
+        <div class="chart-container"><h3 style="color:var(--green-dark); font-size:.95rem; font-weight:700; margin-bottom:1rem;">💰 Montants saisis par mois (millions FCFA)</h3><canvas id="chart-montants"></canvas></div>
+        <div class="chart-container"><h3 style="color:var(--green-dark); font-size:.95rem; font-weight:700; margin-bottom:1rem;">🏷️ Répartition par motif de contrôle</h3><canvas id="chart-motifs"></canvas></div>
+        <div class="chart-container"><h3 style="color:var(--green-dark); font-size:.95rem; font-weight:700; margin-bottom:1rem;">📍 Répartition par département</h3><canvas id="chart-lieux"></canvas></div>
+      </div>
+
+      <div class="form-section">
+        <h2>📋 Tableau récapitulatif annuel</h2>
+        <div style="overflow-x:auto;" id="bilan-table-container"></div>
+      </div>
+    </div>
+
+    <!-- ===== INDICATEURS D'ACTIVITE DR (issu du fichier Excel) ===== -->
+    <div id="section-indicateurs" class="section" style="display:none;">
+      <h1 class="section-title" style="margin-bottom:.4rem;">🗂️ Indicateurs d'Activité — Direction Régionale</h1>
+      <p style="color:#666; font-size:.88rem; margin-bottom:.6rem;">Bilan annuel des 33 indicateurs de la DR Katiola (Hambol) — 2026 à 2056</p>
+      <div id="ind-readonly-note" style="display:none; background:#fff3e0; border:1px solid #ffcc80; color:#8a5300; border-radius:10px; padding:8px 14px; font-size:.76rem; margin-bottom:1rem;">🔒 Consultation seule — la saisie des indicateurs régionaux est réservée au profil Administrateur.</div>
+
+      <div id="ind-form-section" class="form-section">
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem; margin-bottom:.4rem;">
+          <h2 style="margin:0;">📝 Saisie des indicateurs par année</h2>
+          <div style="display:flex; gap:.6rem; align-items:center;">
+            <label class="form-label" style="margin:0;">Année</label>
+            <select id="ind-annee" class="input-3d" style="width:auto;" onchange="loadIndicateurYear()"></select>
+          </div>
+        </div>
+        <p style="font-size:.72rem; color:#999; margin-bottom:1rem;">DR : <strong>Katiola (Hambol)</strong> — laissez un champ à 0 si la donnée n'est pas encore disponible pour cette année.</p>
+        <div id="ind-groups-container"></div>
+        <div style="display:flex; gap:1rem; flex-wrap:wrap; margin-top:1.4rem;">
+          <button onclick="saveIndicateurYear()" class="btn-3d btn-green" style="flex:1; min-width:220px;">✅ Enregistrer les indicateurs de l'année</button>
+          <button onclick="clearIndicateurYear()" class="btn-3d btn-gray" style="min-width:160px;">🔄 Remettre à zéro (cette année)</button>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem; margin-bottom:1rem;">
+          <h2 style="margin:0;">📊 Tableau récapitulatif 2026–2056 (avec TOTAL)</h2>
+          <button onclick="exportIndicateursCSV()" class="btn-3d btn-blue">📥 Exporter en Excel (CSV)</button>
+          <button onclick="exportSectorPDF('ind-table-container','Indicateurs d\'Activité — Direction Régionale','indicateurs')" class="btn-3d btn-red">🖨️ Imprimer en PDF</button>
+        </div>
+        <div style="overflow-x:auto; max-width:100%;" id="ind-table-container"></div>
+        <p style="font-size:.72rem; color:#999; margin-top:.6rem;">La ligne TOTAL est calculée automatiquement (somme des années où au moins une valeur a été saisie).</p>
+      </div>
+    </div>
+
+    <!-- ===== PARAMETRES ===== -->
+    <div id="section-parametres" class="section" style="display:none;">
+      <h1 class="section-title" style="margin-bottom:.4rem;">⚙️ Paramètres &amp; Référentiels</h1>
+      <p style="color:#666; font-size:.88rem; margin-bottom:1.4rem;">Gestion des listes de référence, sauvegarde des données et journal d'audit</p>
+
+      <div class="tabs">
+        <div class="tab-btn active" data-tab="tab-referentiels" onclick="showParamTab('tab-referentiels')">📚 Référentiels</div>
+        <div class="tab-btn" data-tab="tab-audit" onclick="showParamTab('tab-audit')">🕓 Journal d'audit</div>
+        <div class="tab-btn" data-tab="tab-sauvegarde" onclick="showParamTab('tab-sauvegarde')">💾 Sauvegarde</div>
+        <div class="tab-btn" data-tab="tab-licence" onclick="showParamTab('tab-licence')">💳 Abonnement</div>
+        <div class="tab-btn" data-tab="tab-securite" onclick="showParamTab('tab-securite')">🛡️ Sécurité &amp; feuille de route</div>
+      </div>
+
+      <div id="tab-referentiels" class="param-tab">
+        <div id="referentiels-container" style="display:grid; grid-template-columns:repeat(2,1fr); gap:1rem;"></div>
+      </div>
+
+      <div id="tab-audit" class="param-tab" style="display:none;">
+        <div class="form-section">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <h2 style="border:none; margin:0; padding:0;">Journal d'audit (200 derniers événements)</h2>
+            <button onclick="exportAudit()" class="btn-3d btn-blue" style="padding:8px 16px; font-size:.8rem;">⬇️ Exporter</button>
+          </div>
+          <div style="overflow-x:auto;" id="audit-table-container"></div>
+        </div>
+      </div>
+
+      <div id="tab-sauvegarde" class="param-tab" style="display:none;">
+        <div class="form-section">
+          <h2>Sauvegarde et restauration</h2>
+          <p style="font-size:.85rem; color:#666; margin-bottom:1rem;">Exportez l'ensemble des données (opérateurs, missions, référentiels) au format JSON, ou restaurez une sauvegarde précédente.</p>
+          <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+            <button onclick="backupData()" class="btn-3d btn-green" style="min-width:200px;">⬇️ Exporter toutes les données</button>
+            <label class="btn-3d btn-blue" style="min-width:200px; text-align:center; cursor:pointer;">⬆️ Importer une sauvegarde
+              <input type="file" accept="application/json" onchange="restoreData(event)" style="display:none;">
+            </label>
+            <button onclick="resetDemoData()" class="btn-3d btn-orange" style="min-width:200px;">♻️ Réinitialiser les données de démonstration</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-licence" class="param-tab" style="display:none;">
+        <div class="form-section">
+          <h2>💳 Statut de l'abonnement</h2>
+          <div id="licence-status-card" style="background:var(--green-pale); border-radius:12px; padding:1.1rem 1.3rem; margin-bottom:1.3rem;"></div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.2rem;">
+            <div>
+              <div class="form-label">💙 Paiement Wave</div>
+              <div style="background:#fff; border:1px solid #eee; border-radius:10px; padding:10px 14px; font-size:.88rem;">📱 <strong>07 49 95 08 06</strong><br><span style="color:#888; font-size:.75rem;">Kouame Sidoine Prince Romaric</span></div>
+            </div>
+            <div>
+              <div class="form-label">🟠 Paiement Orange Money CI</div>
+              <div style="background:#fff; border:1px solid #eee; border-radius:10px; padding:10px 14px; font-size:.88rem;">📱 <strong>07 49 95 08 06</strong><br><span style="color:#888; font-size:.75rem;">Kouame Sidoine Prince Romaric</span></div>
+            </div>
+          </div>
+          <p style="font-size:.78rem; color:#888; margin-bottom:1rem;">Abonnement : <strong>5 000 FCFA / 2 mois</strong>, après 30 jours d'essai gratuit. Technicien Supérieur de l'Informatique — envoyez la preuve de paiement pour recevoir votre code d'activation.</p>
+          <div id="licence-tab-error" style="display:none; background:#ffebee; color:var(--red-main); padding:10px 14px; border-radius:8px; font-size:.8rem; margin-bottom:1rem;"></div>
+          <div style="display:flex; gap:.7rem; flex-wrap:wrap;">
+            <input type="text" id="licence-tab-code" class="input-3d" placeholder="Code d'activation" style="flex:1; min-width:220px;">
+            <button onclick="activateLicence('licence-tab-code','licence-tab-error')" class="btn-3d btn-green" style="min-width:180px;">✅ Activer / Renouveler</button>
+          </div>
+          <div style="margin-top:1.4rem;">
+            <h2 style="font-size:.95rem;">Historique des activations</h2>
+            <div style="overflow-x:auto;" id="licence-history-container"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-securite" class="param-tab" style="display:none;">
+        <div class="form-section">
+          <h2>🛡️ Ce qui est déjà en place (dans le navigateur)</h2>
+          <ul style="font-size:.85rem; color:#444; line-height:1.9; padding-left:1.2rem;">
+            <li>Mots de passe jamais stockés en clair : seule l'empreinte SHA-256 est conservée.</li>
+            <li>Matricule normalisé (espaces retirés, majuscules) et comparaison insensible à la casse, avec unicité imposée.</li>
+            <li>Verrouillage temporaire après 5 tentatives échouées (5 minutes), et déconnexion automatique après 30 minutes d'inactivité.</li>
+            <li>Journal d'audit horodaté (connexions, échecs, créations, suppressions, exports).</li>
+            <li>RBAC par rôle : les formulaires de saisie et boutons de suppression sont masqués pour les profils en lecture seule.</li>
+            <li>Cloisonnement des dossiers d'un « Chef de mission » à son seul département assigné.</li>
+          </ul>
+        </div>
+        <div class="form-section">
+          <h2>⚠️ Limite structurelle à connaître</h2>
+          <p style="font-size:.85rem; color:#444; line-height:1.7;">Cette application est actuellement <strong>100% côté navigateur</strong> (aucun serveur, base de données locale). Ces protections réduisent les risques mais restent contournables par une personne qui modifie le JavaScript localement — <strong>le frontend ne doit jamais être seul juge des droits d'un utilisateur</strong>. Pour un déploiement avec des données réellement sensibles, la vérification des rôles doit être rejouée côté serveur, sur chaque requête.</p>
+        </div>
+        <div class="form-section">
+          <h2>🏗️ Architecture recommandée pour la version serveur (projet CONNECT)</h2>
+          <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:1rem; font-size:.83rem; color:#444;" class="form-grid">
+            <div><strong>Frontend :</strong> React + TypeScript (Vite ou Next.js)</div>
+            <div><strong>Backend :</strong> Node.js + TypeScript (Express ou NestJS)</div>
+            <div><strong>Base de données :</strong> PostgreSQL + Prisma (ORM)</div>
+            <div><strong>Authentification :</strong> session sécurisée ou JWT court + refresh token</div>
+            <div><strong>Validation :</strong> Zod côté serveur</div>
+            <div><strong>Exports :</strong> PDF (Puppeteer/PDFKit), Word (docx)</div>
+            <div><strong>Suppression :</strong> logique (champ <code>deletedAt</code>), jamais physique par défaut</div>
+            <div><strong>Renfort :</strong> Helmet, limitation de débit, 2FA pour les administrateurs</div>
+          </div>
+          <p style="font-size:.78rem; color:#888; margin-top:1rem;">Rôles cibles : <code>ADMINISTRATEUR</code> (gestion complète), <code>DIRECTEUR</code> et <code>SOUS_DIRECTEUR</code> (lecture globale + export, sans saisie), <code>INSPECTEUR</code> (lecture, audit, export), <code>CHEF_DE_MISSION</code> (saisie et modification limitées à sa mission). Chaque route API doit filtrer les données via une fonction centralisée (<code>buildMissionScope</code>) plutôt que de faire confiance à l'identifiant transmis par le navigateur.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== UTILISATEURS / TABLE D'INSCRIPTION ===== -->
+    <div id="section-utilisateurs" class="section" style="display:none;">
+      <h1 class="section-title" style="margin-bottom:.4rem;">👥 Gestion des Utilisateurs</h1>
+      <p style="color:#666; font-size:.88rem; margin-bottom:1rem;">Inscription des comptes, attribution des rôles et cloisonnement par mission — réservé au profil Administrateur</p>
+
+      <div style="background:#fff8e1; border:1px solid #f0d878; color:#8a6300; border-radius:10px; padding:10px 16px; font-size:.78rem; margin-bottom:1.2rem;">
+        ⚠️ Cette plateforme fonctionne actuellement sans serveur : les comptes et mots de passe (hachés) sont stockés dans le navigateur. Pour un usage réel avec des données sensibles, ces vérifications doivent être rejouées côté serveur (voir l'onglet <strong>Sécurité &amp; feuille de route</strong> dans Paramètres) — le frontend ne doit jamais être seul juge des droits d'un utilisateur.
+      </div>
+
+      <div class="form-section">
+        <h2 id="user-form-title">📝 Inscrire un utilisateur</h2>
+        <div class="form-grid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:1rem;">
+          <div><label class="form-label">Matricule <span class="required">*</span></label><input type="text" id="us-matricule" class="input-3d" placeholder="Ex : 344 263R"></div>
+          <div><label class="form-label">Nom complet <span class="required">*</span></label><input type="text" id="us-nom" class="input-3d" placeholder="Nom et prénoms"></div>
+          <div><label class="form-label">Rôle <span class="required">*</span></label><select id="us-role" class="input-3d" onchange="toggleUserDeptField()"></select></div>
+          <div id="us-dept-wrap" style="display:none;"><label class="form-label">Mission / Département affecté <span class="required">*</span></label><select id="us-departement" class="input-3d"></select></div>
+          <div><label class="form-label">Mot de passe temporaire <span class="required">*</span></label><input type="text" id="us-password" class="input-3d" placeholder="Ex : 8Kd2-Fq91"></div>
+          <div><label class="form-label">Statut</label><select id="us-actif" class="input-3d"><option value="true">Actif</option><option value="false">Désactivé</option></select></div>
+        </div>
+        <p style="font-size:.72rem; color:#999; margin-top:.6rem;">Le matricule est normalisé automatiquement (espaces retirés, majuscules) et doit être unique. Un rôle « Chef de mission » est obligatoirement rattaché à un seul département : ses accès aux dossiers seront limités à ce périmètre.</p>
+        <div style="display:flex; gap:1rem; flex-wrap:wrap; margin-top:1.2rem;">
+          <button onclick="saveUser()" class="btn-3d btn-green" style="flex:1; min-width:200px;">✅ Inscrire / Mettre à jour</button>
+          <button onclick="clearUserForm()" class="btn-3d btn-gray" style="min-width:140px;">🔄 Réinitialiser</button>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h2>📋 Table d'inscription des utilisateurs</h2>
+        <div style="display:flex; gap:1rem; margin-bottom:1rem; flex-wrap:wrap;">
+          <input type="text" id="search-us" class="search-bar" placeholder="🔍 Rechercher par matricule, nom, rôle..." oninput="renderUsers()" style="flex:1; min-width:240px;">
+        </div>
+        <div style="overflow-x:auto;" id="us-table-container"></div>
+        <div style="font-size:.72rem; color:#999; margin-top:.6rem;" id="us-count-tag"></div>
+      </div>
+
+      <div class="form-section">
+        <h2>🔐 Matrice des permissions par rôle</h2>
+        <div style="overflow-x:auto;" id="matrix-table-container"></div>
+      </div>
+    </div>
+
+  </div>
+  <div class="footer-note">Plateforme Intégrée DRCIA Hambol — Sprint Digital 2026 · Données stockées localement dans votre navigateur</div>
+</div>
+
+<!-- ==================== JAVASCRIPT ==================== -->
+<script>
+// ===================== BASE DE DONNEES (localStorage) =====================
+const DB_KEY = 'drcia_hambol_db';
+const SEXES = ['Homme','Femme'];
+const NATIONALITES = ['Ivoirien','Non Ivoirien'];
+
+function defaultParams(){
+  return {
+    departements: ['Katiola','Niakaramandougou','Dabakala','Fronan'],
+    secteurs: ['Boulangeries','Boutiques','Poissonneries','Quincailleries','Merceries','Dépôt de boissons','Pharmacies','Restaurant / Maquis','Salon de coiffure','Station-services','Menuiseries','Couture / Tailleurs','Cordonneries','Électroniques','Librairie-Papeterie','Vente de pièces détachées','Garage auto/moto','Bureautique / Photocopie','Matériaux de construction','Pressing / Teinturerie'],
+    motifs: ['Marchandise contrefaite','Produit non conforme aux normes','Vente illicite','Absence de marquage obligatoire','Dépassement de date de péremption','Commerce sans autorisation','Non-respect de la réglementation des prix',"Défaut d'enregistrement",'Autre'],
+    statuts: ['Planifiée','Réalisée','Régularisée','Annulée'],
+    chefsMission: ['M. Koffi N\'Guessan','Mme Bamba Aïcha','M. Traoré Sidiki']
+  };
+}
+
+function seedOperateurs(){
+  return [
+    {id:'OP-2026-0001', numCni:'CI0235001478', nom:"N'GONIAN", prenom:'Akissi Cynthia Elodie', sexe:'Femme', nationalite:'Ivoirien', dateNaissance:'', telephone:'0749950806', departement:'Katiola', localite:'Niamonkaha', activite:'Boulangeries', photo:null, createdAt:new Date().toISOString()},
+    {id:'OP-2026-0002', numCni:'CI0235009991', nom:'KOUAME', prenom:'Sido', sexe:'Homme', nationalite:'Non Ivoirien', dateNaissance:'', telephone:'', departement:'Niakaramandougou', localite:'Dog', activite:'Boutiques', photo:null, createdAt:new Date().toISOString()},
+    {id:'OP-2026-0003', numCni:'CI0235002563', nom:'AKISSI', prenom:'Cynthia Elodie', sexe:'Femme', nationalite:'Ivoirien', dateNaissance:'', telephone:'', departement:'Katiola', localite:'Belle Ville 2', activite:'Poissonneries', photo:null, createdAt:new Date().toISOString()},
+    {id:'OP-2026-0004', numCni:'CI0235003784', nom:'GNANGBE', prenom:'Emmanuel', sexe:'Homme', nationalite:'Ivoirien', dateNaissance:'', telephone:'', departement:'Dabakala', localite:'Gbedekaha 2', activite:'Quincailleries', photo:null, createdAt:new Date().toISOString()},
+    {id:'OP-2026-0005', numCni:'CI0235004215', nom:'SIDOINE', prenom:'Prince Romaric', sexe:'Homme', nationalite:'Ivoirien', dateNaissance:'', telephone:'', departement:'Fronan', localite:'Centre-ville', activite:'Pharmacies', photo:null, createdAt:new Date().toISOString()},
+    {id:'OP-2026-0006', numCni:'CI0235005629', nom:'KONE', prenom:'Adama', sexe:'Homme', nationalite:'Non Ivoirien', dateNaissance:'', telephone:'', departement:'Katiola', localite:'Air France', activite:'Dépôt de boissons', photo:null, createdAt:new Date().toISOString()},
+    {id:'OP-2026-0007', numCni:'CI0235006341', nom:'YAO', prenom:'Affoué', sexe:'Femme', nationalite:'Ivoirien', dateNaissance:'', telephone:'', departement:'Niakaramandougou', localite:'Lycée', activite:'Restaurant / Maquis', photo:null, createdAt:new Date().toISOString()},
+    {id:'OP-2026-0008', numCni:'CI0235007852', nom:'DIALLO', prenom:'Mamadou', sexe:'Homme', nationalite:'Non Ivoirien', dateNaissance:'', telephone:'', departement:'Dabakala', localite:'Marché central', activite:'Vente de pièces détachées', photo:null, createdAt:new Date().toISOString()},
+    {id:'OP-2026-0009', numCni:'CI0235008096', nom:'TRAORE', prenom:'Fatoumata', sexe:'Femme', nationalite:'Ivoirien', dateNaissance:'', telephone:'', departement:'Fronan', localite:'Gare routière', activite:'Salon de coiffure', photo:null, createdAt:new Date().toISOString()},
+    {id:'OP-2026-0010', numCni:'CI0235009470', nom:'OUATTARA', prenom:'Issouf', sexe:'Homme', nationalite:'Ivoirien', dateNaissance:'', telephone:'', departement:'Katiola', localite:'Zone industrielle', activite:'Garage auto/moto', photo:null, createdAt:new Date().toISOString()}
+  ];
+}
+
+function seedMissions(){
+  const y = new Date().getFullYear();
+  return [
+    {id:'MCIA-HB-'+y+'-0001', date:y+'-02-14', heure:'09:30', chef:"M. Koffi N'Guessan", operateur:"N'GONIAN Akissi Cynthia Elodie", produits:'Pains et viennoiseries', departement:'Katiola', lieu:'Niamonkaha', controleurs:2, motif:'Absence de marquage obligatoire', quantite:40, prix:1500, montant:60000, nbpv:1, nbconv:0, statut:'Réalisée', observations:'', createdAt:new Date().toISOString()},
+    {id:'MCIA-HB-'+y+'-0002', date:y+'-03-05', heure:'11:00', chef:'Mme Bamba Aïcha', operateur:'KOUAME Sido', produits:'Articles divers', departement:'Niakaramandougou', lieu:'Dog', controleurs:3, motif:'Marchandise contrefaite', quantite:120, prix:2500, montant:300000, nbpv:1, nbconv:1, statut:'Régularisée', observations:'', createdAt:new Date().toISOString()},
+    {id:'MCIA-HB-'+y+'-0003', date:y+'-04-18', heure:'08:15', chef:'M. Traoré Sidiki', operateur:'AKISSI Cynthia Elodie', produits:'Poissons fumés', departement:'Katiola', lieu:'Belle Ville 2', controleurs:2, motif:'Dépassement de date de péremption', quantite:75, prix:1000, montant:75000, nbpv:1, nbconv:0, statut:'Réalisée', observations:'', createdAt:new Date().toISOString()},
+    {id:'MCIA-HB-'+y+'-0004', date:y+'-06-02', heure:'14:00', chef:"M. Koffi N'Guessan", operateur:'GNANGBE Emmanuel', produits:'Quincaillerie', departement:'Dabakala', lieu:'Gbedekaha 2', controleurs:2, motif:'Non-respect de la réglementation des prix', quantite:30, prix:5000, montant:150000, nbpv:1, nbconv:1, statut:'Planifiée', observations:'', createdAt:new Date().toISOString()},
+    {id:'MCIA-HB-'+y+'-0005', date:y+'-07-22', heure:'10:45', chef:'Mme Bamba Aïcha', operateur:'SIDOINE Prince Romaric', produits:'Médicaments', departement:'Fronan', lieu:'Centre-ville', controleurs:3, motif:'Vente illicite', quantite:15, prix:8000, montant:120000, nbpv:1, nbconv:0, statut:'Réalisée', observations:'', createdAt:new Date().toISOString()},
+    {id:'MCIA-HB-'+y+'-0006', date:y+'-08-30', heure:'09:00', chef:'M. Traoré Sidiki', operateur:'KONE Adama', produits:'Boissons', departement:'Katiola', lieu:'Air France', controleurs:2, motif:"Défaut d'enregistrement", quantite:200, prix:600, montant:120000, nbpv:1, nbconv:1, statut:'Annulée', observations:'', createdAt:new Date().toISOString()}
+  ];
+}
+
+// ===================== INDICATEURS D'ACTIVITE DR — définitions (doivent précéder defaultDB) =====================
+const IND_ANNEES = []; for (let y = 2026; y <= 2056; y++) IND_ANNEES.push(String(y));
+const IND_DR_NOM = 'Katiola (Hambol)';
+const IND_GROUPS = [
+  { title: "📣 Sensibilisation & structures", fields: [
+    { key:'structures_syndicales', label:"Nombre de structures syndicales rencontrées" },
+    { key:'operateurs_sensibilises', label:"Nombre d'opérateurs économiques sensibilisés aux procédures d'importation et exportation" },
+    { key:'seances_sensibilisation', label:"Nombre de séances de sensibilisation des opérateurs économiques" },
+  ]},
+  { title: "🔎 Contrôles & missions", fields: [
+    { key:'missions_controle', label:"Nombre de missions de contrôles et de surveillance" },
+  ]},
+  { title: "📑 PV & amendes transactionnelles", fields: [
+    { key:'pv_rediges', label:"Nombre de PV liés aux amendes transactionnelles rédigés" },
+    { key:'pv_recouvres', label:"Nombre de PV liés aux amendes transactionnelles recouvrés" },
+    { key:'pv_a_recouvrer', label:"Nombre de PV liés aux amendes transactionnelles à recouvrer" },
+    { key:'amendes_a_recouvrer', label:"Amendes transactionnelles liées aux PV à recouvrer (FCFA)" },
+    { key:'amendes_recouvrees', label:"Amendes transactionnelles liées aux PV recouvrées (FCFA)" },
+  ]},
+  { title: "📦 Produits saisis / détruits", fields: [
+    { key:'volume_saisis', label:"Volume des produits saisis (T)" },
+    { key:'volume_detruits', label:"Volume des produits détruits (T)" },
+    { key:'montant_saisis', label:"Montant des produits saisis (FCFA)" },
+    { key:'montant_detruits', label:"Montant des produits détruits (FCFA)" },
+  ]},
+  { title: "🏪 Commerce intérieur & consommateurs", fields: [
+    { key:'commercants_recenses', label:"Nombre de commerçants recensés" },
+    { key:'assoc_consommateurs', label:"Nombre d'association de consommateurs en activités" },
+    { key:'orga_pro_commercants', label:"Nombre d'organisation professionnelle de commerçants en activités" },
+    { key:'taux_prix_plafonnes', label:"Taux de respect des prix plafonnés (%)" },
+  ]},
+  { title: "🌍 Commerce extérieur", fields: [
+    { key:'demandes_certif', label:"Nombre de demande de certificat de conformité" },
+    { key:'certif_delivres', label:"Nombre de certificat de conformité délivré" },
+    { key:'code_import_export', label:"Nombre code import-export délivré" },
+    { key:'levee_gage', label:"Nombre de levée de gage délivré" },
+    { key:'entreprises_encadrees', label:"Nombre d'entreprises encadrées dans le cadre du commerce extérieur" },
+  ]},
+  { title: "🏭 Industrie", fields: [
+    { key:'unites_controlees', label:"Nombre d'unités industrielles controlées" },
+    { key:'unites_recensees', label:"Nombre d'unités industrielles récensées" },
+    { key:'unites_actives', label:"Nombre d'unités industrielles en activité" },
+    { key:'unites_nouvelles', label:"Nombre d'unités industrielles nouvellement installées" },
+    { key:'terrains_valides', label:"Nombre de demande de terrains industriels validé" },
+    { key:'zones_industrielles', label:"Nombre de zone industrielle dans la localité" },
+    { key:'etudes_eies', label:"Nombre Études d'Impact Environnementale et Sociale réalisées" },
+    { key:'missions_sensib_indus', label:"Nombre de missions de sensibilisation industrielle" },
+  ]},
+  { title: "🪚 Artisanat & PME", fields: [
+    { key:'artisans_immatricules', label:"Nombre d'artisans immatriculés" },
+    { key:'artisans_assistes', label:"Nombre d'artisans assistés en terme de renforcement de capacité technique" },
+    { key:'pme_assistees', label:"Nombre de PME assistées en terme de renforcement de capacité technique et managériale" },
+  ]},
+];
+const IND_FIELDS = IND_GROUPS.flatMap(g => g.fields);
+function seedIndicateurs(){
+  const data = {};
+  IND_ANNEES.forEach(y => {
+    const row = {};
+    IND_FIELDS.forEach(f => row[f.key] = 0);
+    data[y] = row;
+  });
+  return data;
+}
+
+function defaultDB(){
+  return { operateurs: seedOperateurs(), missions: seedMissions(), params: defaultParams(), audit: [], users: seedUsers(), indicateurs: seedIndicateurs() };
+}
+
+let db = loadDB();
+function loadDB(){
+  const raw = localStorage.getItem(DB_KEY);
+  if (!raw) return defaultDB();
+  try {
+    const parsed = JSON.parse(raw);
+    parsed.operateurs = parsed.operateurs || [];
+    parsed.missions = parsed.missions || [];
+    parsed.params = parsed.params || defaultParams();
+    parsed.audit = parsed.audit || [];
+    parsed.users = (parsed.users && parsed.users.length) ? parsed.users : seedUsers();
+    parsed.indicateurs = (parsed.indicateurs && Object.keys(parsed.indicateurs).length) ? parsed.indicateurs : seedIndicateurs();
+    return parsed;
+  } catch(e) { return defaultDB(); }
+}
+function saveDB(){ localStorage.setItem(DB_KEY, JSON.stringify(db)); }
+
+// ===================== SAUVEGARDE AUTOMATIQUE DES SAISIES EN COURS (BROUILLONS) =====================
+// Objectif : si l'agent est déconnecté (session expirée, fermeture accidentelle
+// de l'onglet, coupure de connexion) avant d'avoir cliqué sur "Enregistrer",
+// ce qu'il avait déjà tapé n'est pas perdu : il le retrouve à sa prochaine
+// connexion, dans le même navigateur/poste.
+const AUTOSAVE_DEBOUNCE_MS = 400;
+const autosaveTimers = {};
+function draftKey(formId){ return 'drcia_draft_' + formId + '_' + (session.user || 'anon'); }
+function attachAutosave(formId, fieldIds, isEditingFn){
+  fieldIds.forEach(fid => {
+    const el = document.getElementById(fid);
+    if (!el) return;
+    el.addEventListener('input', () => {
+      if (isEditingFn && isEditingFn()) return; // pas de brouillon pendant la modification d'une fiche existante
+      clearTimeout(autosaveTimers[formId]);
+      autosaveTimers[formId] = setTimeout(() => {
+        const draft = {};
+        fieldIds.forEach(id => { const e = document.getElementById(id); if (e) draft[id] = e.value; });
+        localStorage.setItem(draftKey(formId), JSON.stringify(draft));
+      }, AUTOSAVE_DEBOUNCE_MS);
+    });
+  });
+}
+function restoreAutosave(formId, fieldIds){
+  const raw = localStorage.getItem(draftKey(formId));
+  if (!raw) return false;
+  try {
+    const draft = JSON.parse(raw);
+    let restored = false;
+    fieldIds.forEach(fid => {
+      const el = document.getElementById(fid);
+      if (el && draft[fid] !== undefined && draft[fid] !== ''){ el.value = draft[fid]; restored = true; }
+    });
+    return restored;
+  } catch(e){ return false; }
+}
+function clearAutosave(formId){ localStorage.removeItem(draftKey(formId)); }
+
+const OP_FORM_FIELDS = ['op-numcni','op-nom','op-prenom','op-sexe','op-nationalite','op-datenaissance','op-telephone','op-departement','op-localite','op-activite'];
+const MS_FORM_FIELDS = ['ms-date','ms-heure','ms-chef','ms-operateur','ms-produits','ms-departement','ms-lieu','ms-controleurs','ms-motif','ms-quantite','ms-prix','ms-montant','ms-nbpv','ms-nbconv','ms-statut','ms-observations'];
+function restoreAllDrafts(){
+  const opRestored = restoreAutosave('operateur', OP_FORM_FIELDS);
+  const msRestored = restoreAutosave('mission', MS_FORM_FIELDS);
+  if (opRestored || msRestored){
+    showToast('Brouillon(s) de saisie restauré(s) depuis votre dernière session.', 'info');
+  }
+}
+
+function nextOperateurId(){ return 'OP-' + new Date().getFullYear() + '-' + String(db.operateurs.length + 1).padStart(4,'0'); }
+function nextMissionId(){ return 'MCIA-HB-' + new Date().getFullYear() + '-' + String(db.missions.length + 1).padStart(4,'0'); }
+let session = {user:'', role:''};
+
+function audit(action, detail){
+  db.audit.unshift({date:new Date().toISOString(), user:session.user, role:session.role, action, detail});
+  db.audit = db.audit.slice(0,200);
+  saveDB();
+}
+function esc(v){ return String(v ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+
+// ===================== ABONNEMENT / LICENCE =====================
+// Stockage séparé de la base métier : un reset des données de démo ou une
+// restauration de sauvegarde n'affecte jamais le statut de l'abonnement.
+const LICENCE_KEY = 'drcia_hambol_licence';
+const TRIAL_DAYS = 30;      // durée de l'essai gratuit
+const RENEWAL_DAYS = 60;    // durée d'un abonnement (2 mois)
+const SUBSCRIPTION_PRICE = '5 000 FCFA';
+// Code d'activation transmis par le développeur (Kouame Sidoine Prince Romaric)
+// après réception du paiement Wave / Orange Money CI.
+// SECURITE : le code n'est plus stocké en clair ici (il était visible via
+// "Afficher le code source", ce qui permettait d'activer l'abonnement sans payer).
+// On ne conserve que son empreinte SHA-256. Le code réel à transmettre aux
+// clients reste : PRINCE-DRCIA-5000 (conservez-le en lieu sûr, hors de ce fichier).
+// ⚠️ Rappel important : ce hash reste techniquement visible et cassable par un
+// attaquant motivé (le calcul se fait dans le navigateur). Il ne fait que
+// relever le niveau par rapport au code en clair — la seule protection réelle
+// est une vérification côté serveur (voir le projet CONNECT).
+const MASTER_ACTIVATION_HASH = 'ac686cd10caf3eda0d6a1a55d5afd7f6d9aefefd08863e7a950b6d52af5f8283';
+
+async function sha256Hex(text){
+  const enc = new TextEncoder().encode(text);
+  const buf = await crypto.subtle.digest('SHA-256', enc);
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+// ===================== ROLES & PERMISSIONS (RBAC) =====================
+// Cinq rôles, alignés sur la matrice d'accès validée :
+// - ADMINISTRATEUR   : gestion complète (utilisateurs, référentiels, dossiers, exports).
+// - DIRECTEUR / SOUS_DIRECTEUR : accès global en LECTURE + export, aucune saisie.
+// - INSPECTEUR       : lecture, audit et export, aucune suppression.
+// - CHEF_DE_MISSION   : saisie et modification limitées à SON seul département.
+const ROLES = ['Administrateur','Directeur Régional','Sous-directeur Régional','Inspecteur','Chef de mission','Informaticien','Agent de saisie','Contrôleur'];
+const ROLE_PERMISSIONS = {
+  'Administrateur':          ['records:read','records:create','records:update','records:delete','records:export','users:manage','params:manage','audit:read'],
+  'Directeur Régional':      ['records:read','records:export','audit:read'],
+  'Sous-directeur Régional': ['records:read','records:export','audit:read'],
+  'Inspecteur':              ['records:read','records:export','audit:read'],
+  'Chef de mission':         ['records:read','records:create','records:update','records:export'],
+  'Informaticien':           ['records:read','records:create','records:update','records:delete','records:export','users:manage','params:manage','audit:read'],
+  'Agent de saisie':         ['records:read','records:create','records:update','records:export'],
+  'Contrôleur':              ['records:read','records:create','records:update','records:export'],
+};
+const ROLE_SCOPE_LABEL = {
+  'Administrateur':          '🟢 Accès total — Administration de la plateforme',
+  'Directeur Régional':      '🔵 Accès global en lecture et export — Supervision et contrôle',
+  'Sous-directeur Régional': '🔵 Accès global en lecture et export — Supervision et contrôle',
+  'Inspecteur':              '🔵 Accès en lecture, audit et export — Supervision et contrôle',
+  'Chef de mission':         '🟠 Accès restreint à votre mission / département',
+  'Informaticien':           '🟢 Accès total — Administration technique de la plateforme',
+  'Agent de saisie':         '🟠 Saisie — vous ne voyez que vos propres enregistrements, sauf matricule autorisé',
+  'Contrôleur':              '🟠 Saisie — vous ne voyez que vos propres enregistrements, sauf matricule autorisé',
+};
+
+// ===================== MATRICULES AUTORISES A LA VUE GLOBALE DES DONNEES =====================
+// Un agent de saisie ou contrôleur dont le matricule figure ici peut consulter
+// l'ensemble des données enregistrées par tous les agents. Les autres ne
+// voient que leurs propres saisies. Les rôles de supervision (Administrateur,
+// Directeur, Sous-directeur, Inspecteur, Informaticien) ont de toute façon un
+// accès global de par leur rôle, indépendamment de cette liste.
+const AUTHORIZED_MATRICULES = ['344263R','331687W','904991P','825094F','897882B'];
+function isMatriculeAuthorized(matricule){
+  return AUTHORIZED_MATRICULES.includes(normalizeIdentifiant(matricule));
+}
+const ROLES_WITH_GLOBAL_VIEW = ['Administrateur','Directeur Régional','Sous-directeur Régional','Inspecteur','Informaticien'];
+function hasGlobalView(){
+  if (!session || !session.role) return false;
+  if (ROLES_WITH_GLOBAL_VIEW.includes(session.role)) return true;
+  return isMatriculeAuthorized(session.user);
+}
+// Mapping "Emploi" (formulaire d'inscription) -> rôle interne de la plateforme
+const EMPLOI_TO_ROLE = {
+  'directeur': 'Directeur Régional',
+  'sous-directeur': 'Sous-directeur Régional',
+  'inspecteur': 'Inspecteur',
+  'informaticien': 'Informaticien',
+  'agent de saisie': 'Agent de saisie',
+  'contrôleur': 'Contrôleur',
+};
+function can(permission){
+  const perms = ROLE_PERMISSIONS[session.role] || [];
+  return perms.includes(permission);
+}
+function normalizeIdentifiant(v){
+  return (v || '').normalize('NFKC').replace(/\s+/g, '').trim().toUpperCase();
+}
+
+// ===================== UTILISATEURS (table d'inscription — démo localStorage) =====================
+// Remplace l'ancien objet ACCOUNTS figé : les comptes sont désormais gérés
+// depuis l'écran "Utilisateurs" (inscription, modification, désactivation).
+// Les mots de passe ne sont jamais stockés en clair : seule leur empreinte
+// SHA-256 est conservée. Changez ces identifiants/mots de passe avant tout
+// usage réel avec des données sensibles, et rappelez-vous qu'une vérification
+// purement côté navigateur ne remplace pas un vrai backend (voir Paramètres
+// > Sécurité & feuille de route).
+function seedUsers(){
+  return [
+    {matricule:'ADM2026', fullName:'Administrateur Système',      role:'Administrateur',          departement:'', passHash:'a4aa292aeb0d6d8b3c451adbd71c05232a5ecc168662ff38a046d18ff0987b20', active:true, createdAt:new Date().toISOString(), lastLoginAt:null}, // mot de passe : 0A3D-9D85
+    {matricule:'DIR2026', fullName:'Directeur Régional',           role:'Directeur Régional',      departement:'', passHash:'aa65dd5b9c5d6707c2a18c313d8b7f7148cb7ac7d104c1284e259feb773ad4bc', active:true, createdAt:new Date().toISOString(), lastLoginAt:null}, // mot de passe : 8EFD-1F02
+    {matricule:'SDR2026', fullName:'Sous-directeur Régional',      role:'Sous-directeur Régional', departement:'', passHash:'7c45a018cf555ade5f77497a47780ff5bd56c0493a22d8c353f127d1ae10b349', active:true, createdAt:new Date().toISOString(), lastLoginAt:null}, // mot de passe : 7F21-K93M
+    {matricule:'INS2026', fullName:'Inspecteur Régional',          role:'Inspecteur',              departement:'', passHash:'75cd9a308e979e569a30b3b3f257ba91e4496b31288b3ea4e006dac57f1e94dc', active:true, createdAt:new Date().toISOString(), lastLoginAt:null}, // mot de passe : 54D4-23F8
+    {matricule:'CHM2026', fullName:"M. Koffi N'Guessan",          role:'Chef de mission',         departement:'Katiola', passHash:'12a4ccabf2ef02aa103790deafb8d7ff4f162080388574369f90390e7bb93157', active:true, createdAt:new Date().toISOString(), lastLoginAt:null}, // mot de passe : B648-C06F
+  ];
+}
+function findUserByMatricule(matricule){
+  return (db.users || []).find(u => u.matricule === matricule);
+}
+
+// ===================== INSCRIPTION LIBRE-SERVICE (code envoyé au téléphone) =====================
+// ⚠️ IMPORTANT : cette page HTML seule ne peut pas envoyer de vrai SMS (il faut
+// un serveur + un fournisseur SMS payant, ex. API Orange/MTN). En attendant le
+// vrai backend, le code est affiché à l'écran avec la mention « mode démo » —
+// ce n'est pas une faille cachée, c'est assumé et visible pour ne tromper personne.
+const PENDING_REG_KEY = 'drcia_pending_registrations';
+const CODE_VALIDITY_MS = 5 * 60 * 1000; // 5 minutes
+function loadPendingRegs(){ try { return JSON.parse(localStorage.getItem(PENDING_REG_KEY)) || {}; } catch(e){ return {}; } }
+function savePendingRegs(v){ localStorage.setItem(PENDING_REG_KEY, JSON.stringify(v)); }
+function generateSixDigitCode(){ return String(Math.floor(100000 + Math.random()*900000)); }
+
+function goToRegisterPage(){
+  document.getElementById('page-login').classList.remove('active');
+  document.getElementById('page-register').classList.add('active');
+  document.getElementById('register-error').style.display = 'none';
+  ['register-nom','register-prenom','register-telephone','register-matricule','register-password','register-password2'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('register-emploi').selectedIndex = 0;
+}
+function goToLoginPage(){
+  document.getElementById('page-register').classList.remove('active');
+  document.getElementById('page-verify').classList.remove('active');
+  document.getElementById('page-login').classList.add('active');
+}
+
+async function registerAccount(){
+  const errorDiv = document.getElementById('register-error');
+  errorDiv.style.display = 'none';
+  const nom = document.getElementById('register-nom').value.trim();
+  const prenom = document.getElementById('register-prenom').value.trim();
+  const telephone = document.getElementById('register-telephone').value.trim();
+  const matricule = normalizeIdentifiant(document.getElementById('register-matricule').value);
+  const emploi = document.getElementById('register-emploi').value;
+  const password = document.getElementById('register-password').value;
+  const password2 = document.getElementById('register-password2').value;
+
+  if (!nom || !prenom || !telephone || !matricule || !emploi || !password || !password2){
+    errorDiv.style.display = 'block'; errorDiv.textContent = '⚠️ Veuillez remplir tous les champs obligatoires.'; return;
+  }
+  if (!/^[0-9+\s()-]{8,}$/.test(telephone)){
+    errorDiv.style.display = 'block'; errorDiv.textContent = "⚠️ Numéro de téléphone invalide."; return;
+  }
+  if (matricule.length < 5){
+    errorDiv.style.display = 'block'; errorDiv.textContent = '⚠️ Matricule invalide.'; return;
+  }
+  if (password.length < 8){
+    errorDiv.style.display = 'block'; errorDiv.textContent = '⚠️ Le mot de passe doit contenir au moins 8 caractères.'; return;
+  }
+  if (password !== password2){
+    errorDiv.style.display = 'block'; errorDiv.textContent = '⚠️ Les deux mots de passe ne correspondent pas.'; return;
+  }
+  if (findUserByMatricule(matricule)){
+    errorDiv.style.display = 'block'; errorDiv.textContent = '❌ Ce matricule est déjà associé à un compte.'; return;
+  }
+  const role = EMPLOI_TO_ROLE[emploi];
+  if (!role){
+    errorDiv.style.display = 'block'; errorDiv.textContent = '⚠️ Veuillez sélectionner votre emploi.'; return;
+  }
+
+  const passHash = await sha256Hex(password);
+  const code = generateSixDigitCode();
+  const codeHash = await sha256Hex(code);
+  const pending = loadPendingRegs();
+  pending[matricule] = {
+    nom, prenom, telephone, matricule, role, passHash,
+    codeHash, expiresAt: new Date(Date.now() + CODE_VALIDITY_MS).toISOString()
+  };
+  savePendingRegs(pending);
+
+  document.getElementById('page-register').classList.remove('active');
+  document.getElementById('page-verify').classList.add('active');
+  document.getElementById('verify-phone-display').textContent = telephone;
+  document.getElementById('verify-code').value = '';
+  document.getElementById('verify-error').style.display = 'none';
+  showDemoSmsCode('verify-demo-note', code, telephone);
+}
+
+function showDemoSmsCode(noteElId, code, telephone){
+  const note = document.getElementById(noteElId);
+  note.innerHTML = '🧪 <strong>Mode démonstration</strong> — aucun serveur SMS n\'est encore branché sur cette page. ' +
+    'Dans une version en ligne réelle, ce code serait envoyé par SMS au ' + esc(telephone) + '. ' +
+    'Pour l\'instant, votre code est : <strong style="font-size:1.1rem; letter-spacing:3px;">' + code + '</strong>';
+  showToast('Code de vérification généré (voir ci-dessus — mode démo, aucun SMS réel envoyé).', 'info');
+}
+
+async function verifyRegistrationCode(){
+  const errorDiv = document.getElementById('verify-error');
+  errorDiv.style.display = 'none';
+  const code = document.getElementById('verify-code').value.trim();
+  if (!code){ errorDiv.style.display = 'block'; errorDiv.textContent = '⚠️ Veuillez entrer le code reçu.'; return; }
+
+  const pending = loadPendingRegs();
+  // On retrouve la demande en attente correspondant à ce code (une seule normalement)
+  const matricule = Object.keys(pending).find(m => pending[m] && new Date(pending[m].expiresAt) > new Date());
+  const entry = matricule ? pending[matricule] : null;
+  if (!entry){ errorDiv.style.display = 'block'; errorDiv.textContent = '⛔ Code expiré. Veuillez recommencer l\'inscription.'; return; }
+
+  const codeHash = await sha256Hex(code);
+  if (codeHash !== entry.codeHash){
+    errorDiv.style.display = 'block'; errorDiv.textContent = '❌ Code incorrect. Veuillez réessayer.'; return;
+  }
+
+  db.users.push({
+    matricule: entry.matricule, fullName: entry.nom + ' ' + entry.prenom, role: entry.role,
+    departement: '', telephone: entry.telephone, passHash: entry.passHash,
+    active: true, createdAt: new Date().toISOString(), lastLoginAt: null
+  });
+  saveDB();
+  delete pending[matricule];
+  savePendingRegs(pending);
+  audit('INSCRIPTION', 'Nouveau compte créé par inscription : ' + entry.matricule + ' (' + entry.role + ')' + (isMatriculeAuthorized(entry.matricule) ? ' — matricule autorisé (vue globale)' : ''));
+
+  goToLoginPage();
+  document.getElementById('login-username').value = entry.matricule;
+  showToast('Compte créé et téléphone vérifié avec succès. Vous pouvez vous connecter.', 'success');
+}
+
+async function resendRegistrationCode(){
+  const pending = loadPendingRegs();
+  const matricule = Object.keys(pending).pop();
+  if (!matricule){ showToast('Aucune inscription en attente.', 'error'); return; }
+  const entry = pending[matricule];
+  const code = generateSixDigitCode();
+  entry.codeHash = await sha256Hex(code);
+  entry.expiresAt = new Date(Date.now() + CODE_VALIDITY_MS).toISOString();
+  savePendingRegs(pending);
+  showDemoSmsCode('verify-demo-note', code, entry.telephone);
+}
+
+// ===================== REINITIALISATION DU MOT DE PASSE (code envoyé au téléphone) =====================
+const PENDING_RESET_KEY = 'drcia_pending_resets';
+function loadPendingResets(){ try { return JSON.parse(localStorage.getItem(PENDING_RESET_KEY)) || {}; } catch(e){ return {}; } }
+function savePendingResets(v){ localStorage.setItem(PENDING_RESET_KEY, JSON.stringify(v)); }
+
+async function submitForgotPassword(){
+  const errorDiv = document.getElementById('forgot-error');
+  errorDiv.style.display = 'none';
+  const matricule = normalizeIdentifiant(document.getElementById('forgot-username').value);
+  if (!matricule){ errorDiv.style.display = 'block'; errorDiv.textContent = 'Veuillez entrer votre matricule.'; return; }
+  const user = findUserByMatricule(matricule);
+  if (!user || !user.telephone){
+    // Message volontairement générique : on ne révèle pas si le matricule existe ou non.
+    errorDiv.style.display = 'block';
+    errorDiv.textContent = "Si ce matricule est associé à un compte avec un téléphone enregistré, un code a été envoyé.";
+    return;
+  }
+  const code = generateSixDigitCode();
+  const codeHash = await sha256Hex(code);
+  const resets = loadPendingResets();
+  resets[matricule] = { codeHash, expiresAt: new Date(Date.now() + CODE_VALIDITY_MS).toISOString() };
+  savePendingResets(resets);
+
+  closeForgotModal();
+  document.getElementById('reset-code').value = '';
+  document.getElementById('reset-password').value = '';
+  document.getElementById('reset-password2').value = '';
+  document.getElementById('reset-error').style.display = 'none';
+  document.getElementById('reset-modal').dataset.matricule = matricule;
+  showDemoSmsCode('reset-demo-note', code, user.telephone);
+  document.getElementById('reset-modal').classList.add('show');
+}
+
+async function submitPasswordReset(){
+  const errorDiv = document.getElementById('reset-error');
+  errorDiv.style.display = 'none';
+  const matricule = document.getElementById('reset-modal').dataset.matricule;
+  const code = document.getElementById('reset-code').value.trim();
+  const password = document.getElementById('reset-password').value;
+  const password2 = document.getElementById('reset-password2').value;
+
+  if (!code || !password || !password2){ errorDiv.style.display = 'block'; errorDiv.textContent = '⚠️ Veuillez remplir tous les champs.'; return; }
+  if (password.length < 8){ errorDiv.style.display = 'block'; errorDiv.textContent = '⚠️ Le mot de passe doit contenir au moins 8 caractères.'; return; }
+  if (password !== password2){ errorDiv.style.display = 'block'; errorDiv.textContent = '⚠️ Les deux mots de passe ne correspondent pas.'; return; }
+
+  const resets = loadPendingResets();
+  const entry = resets[matricule];
+  if (!entry || new Date(entry.expiresAt) < new Date()){
+    errorDiv.style.display = 'block'; errorDiv.textContent = '⛔ Code expiré. Veuillez recommencer.'; return;
+  }
+  const codeHash = await sha256Hex(code);
+  if (codeHash !== entry.codeHash){
+    errorDiv.style.display = 'block'; errorDiv.textContent = '❌ Code incorrect.'; return;
+  }
+  const user = findUserByMatricule(matricule);
+  if (!user){ errorDiv.style.display = 'block'; errorDiv.textContent = '❌ Compte introuvable.'; return; }
+  user.passHash = await sha256Hex(password);
+  saveDB();
+  delete resets[matricule];
+  savePendingResets(resets);
+  audit('REINITIALISATION_MDP', 'Mot de passe réinitialisé pour ' + matricule);
+  closeResetModal();
+  document.getElementById('login-username').value = matricule;
+  showToast('Mot de passe réinitialisé avec succès. Vous pouvez vous connecter.', 'success');
+}
+function closeResetModal(){ document.getElementById('reset-modal').classList.remove('show'); }
+
+// ===================== ANTI-BRUTE-FORCE (verrouillage local) =====================
+const LOGIN_ATTEMPTS_KEY = 'drcia_login_attempts';
+const MAX_ATTEMPTS = 5;
+const LOCK_DURATION_MS = 5 * 60 * 1000; // 5 minutes
+function getLoginAttempts(){
+  try { return JSON.parse(localStorage.getItem(LOGIN_ATTEMPTS_KEY)) || {count:0, lockUntil:null}; }
+  catch(e){ return {count:0, lockUntil:null}; }
+}
+function setLoginAttempts(v){ localStorage.setItem(LOGIN_ATTEMPTS_KEY, JSON.stringify(v)); }
+function isLoginLocked(){
+  const a = getLoginAttempts();
+  return a.lockUntil && new Date(a.lockUntil) > new Date();
+}
+function registerFailedAttempt(){
+  const a = getLoginAttempts();
+  a.count = (a.count || 0) + 1;
+  if (a.count >= MAX_ATTEMPTS){
+    a.lockUntil = new Date(Date.now() + LOCK_DURATION_MS).toISOString();
+    a.count = 0;
+  }
+  setLoginAttempts(a);
+}
+function resetLoginAttempts(){ setLoginAttempts({count:0, lockUntil:null}); }
+
+// ===================== EXPIRATION DE SESSION PAR INACTIVITE =====================
+const SESSION_IDLE_LIMIT_MS = 30 * 60 * 1000; // 30 minutes d'inactivité
+let lastActivityAt = Date.now();
+['click','keydown','mousemove','touchstart'].forEach(evt => {
+  document.addEventListener(evt, () => { lastActivityAt = Date.now(); }, {passive:true});
+});
+setInterval(() => {
+  if (session && session.user && Date.now() - lastActivityAt > SESSION_IDLE_LIMIT_MS){
+    audit('DECONNEXION', 'Session expirée pour inactivité');
+    showToast('Session expirée après 30 minutes d\'inactivité. Veuillez vous reconnecter.', 'info');
+    logout();
+  }
+}, 60 * 1000);
+
+function loadLicence(){
+  const raw = localStorage.getItem(LICENCE_KEY);
+  if (raw){ try { return JSON.parse(raw); } catch(e){} }
+  const fresh = { trialStart: new Date().toISOString(), activatedUntil: null, history: [] };
+  localStorage.setItem(LICENCE_KEY, JSON.stringify(fresh));
+  return fresh;
+}
+let licence = loadLicence();
+function saveLicence(){ localStorage.setItem(LICENCE_KEY, JSON.stringify(licence)); }
+function licenceTrialEnd(){ return new Date(new Date(licence.trialStart).getTime() + TRIAL_DAYS*86400000); }
+function licenceActive(){
+  const now = new Date();
+  if (now < licenceTrialEnd()) return true;
+  if (licence.activatedUntil && now < new Date(licence.activatedUntil)) return true;
+  return false;
+}
+function licenceDaysLeftTrial(){ return Math.max(0, Math.ceil((licenceTrialEnd() - new Date()) / 86400000)); }
+function licenceDaysLeftSub(){
+  if (!licence.activatedUntil) return 0;
+  return Math.max(0, Math.ceil((new Date(licence.activatedUntil) - new Date()) / 86400000));
+}
+
+async function activateLicence(inputId, errorId){
+  const input = document.getElementById(inputId);
+  const errorDiv = document.getElementById(errorId);
+  const code = input.value.trim();
+  errorDiv.style.display = 'none';
+  if (!code){ errorDiv.style.display = 'block'; errorDiv.textContent = "Veuillez entrer un code d'activation."; return; }
+  const codeHash = await sha256Hex(code.toUpperCase());
+  if (codeHash !== MASTER_ACTIVATION_HASH){
+    errorDiv.style.display = 'block';
+    errorDiv.textContent = '❌ Code invalide. Vérifiez le code transmis après votre paiement Wave / Orange Money.';
+    return;
+  }
+  const base = (licence.activatedUntil && new Date(licence.activatedUntil) > new Date()) ? new Date(licence.activatedUntil) : new Date();
+  const newExpiry = new Date(base.getTime() + RENEWAL_DAYS*86400000);
+  licence.activatedUntil = newExpiry.toISOString();
+  licence.history = licence.history || [];
+  licence.history.unshift({date:new Date().toISOString(), expiry:newExpiry.toISOString(), montant:SUBSCRIPTION_PRICE});
+  saveLicence();
+  input.value = '';
+  showToast('Abonnement activé jusqu\'au ' + newExpiry.toLocaleDateString('fr-FR') + '.', 'success');
+  if (document.getElementById('tab-licence')) renderLicenceTab();
+  if (document.getElementById('page-paywall').classList.contains('active')){
+    document.getElementById('page-paywall').classList.remove('active');
+    if (session && session.user){
+      document.getElementById('page-dashboard').classList.add('active');
+      document.getElementById('who-label').textContent = 'Déconnexion (' + (session.role||'') + ')';
+      initAllReferenceSelects();
+      showSection('dashboard-home');
+    } else {
+      document.getElementById('page-login').classList.add('active');
+    }
+  }
+  updateTrialBanner();
+}
+
+function showPaywall(){
+  document.getElementById('page-login').classList.remove('active');
+  document.getElementById('page-dashboard').classList.remove('active');
+  document.getElementById('page-paywall').classList.add('active');
+  const status = document.getElementById('paywall-status');
+  if (licence.activatedUntil && new Date(licence.activatedUntil) < new Date()){
+    status.textContent = 'Votre abonnement a expiré le ' + new Date(licence.activatedUntil).toLocaleDateString('fr-FR') + '. Renouvelez pour continuer à utiliser la plateforme.';
+  } else {
+    status.textContent = "Votre période d'essai gratuit de 30 jours est terminée. Activez votre abonnement pour continuer.";
+  }
+}
+function logoutToLogin(){
+  document.getElementById('page-paywall').classList.remove('active');
+  document.getElementById('page-login').classList.add('active');
+}
+function updateTrialBanner(){
+  const banner = document.getElementById('trial-banner');
+  if (!banner) return;
+  const now = new Date();
+  if (now < licenceTrialEnd()){
+    banner.style.display = 'block';
+    banner.textContent = '🎁 Essai gratuit : ' + licenceDaysLeftTrial() + " jour(s) restant(s) — Abonnement 5 000 FCFA / 2 mois via Wave ou Orange Money (07 49 95 08 06)";
+  } else if (licence.activatedUntil && now < new Date(licence.activatedUntil)){
+    const left = licenceDaysLeftSub();
+    if (left <= 7){
+      banner.style.display = 'block';
+      banner.textContent = '⏳ Votre abonnement expire dans ' + left + ' jour(s). Pensez à le renouveler (5 000 FCFA / 2 mois).';
+    } else { banner.style.display = 'none'; }
+  } else {
+    banner.style.display = 'none';
+  }
+}
+function renderLicenceTab(){
+  const card = document.getElementById('licence-status-card');
+  const now = new Date();
+  let statusHtml;
+  if (now < licenceTrialEnd()){
+    statusHtml = '<div style="font-weight:700; color:var(--green-dark);">🎁 Essai gratuit actif</div><div style="font-size:.8rem; color:#555; margin-top:4px;">' + licenceDaysLeftTrial() + ' jour(s) restant(s) — fin le ' + licenceTrialEnd().toLocaleDateString('fr-FR') + '</div>';
+  } else if (licence.activatedUntil && now < new Date(licence.activatedUntil)){
+    statusHtml = '<div style="font-weight:700; color:var(--green-dark);">✅ Abonnement actif</div><div style="font-size:.8rem; color:#555; margin-top:4px;">Valable jusqu\'au ' + new Date(licence.activatedUntil).toLocaleDateString('fr-FR') + ' (' + licenceDaysLeftSub() + ' jour(s) restant(s))</div>';
+  } else {
+    statusHtml = '<div style="font-weight:700; color:var(--red-main);">⛔ Abonnement expiré</div><div style="font-size:.8rem; color:#555; margin-top:4px;">Veuillez renouveler votre abonnement (5 000 FCFA / 2 mois).</div>';
+  }
+  card.innerHTML = statusHtml;
+  const histContainer = document.getElementById('licence-history-container');
+  if (!licence.history || licence.history.length === 0){
+    histContainer.innerHTML = '<div class="empty-state"><div class="icon">💳</div><p>Aucune activation enregistrée pour le moment.</p></div>';
+    return;
+  }
+  let html = '<table class="data-table"><thead><tr><th>Date d\'activation</th><th>Valable jusqu\'au</th><th>Montant</th></tr></thead><tbody>';
+  licence.history.forEach(h => {
+    html += '<tr><td>' + new Date(h.date).toLocaleString('fr-FR') + '</td><td>' + new Date(h.expiry).toLocaleDateString('fr-FR') + '</td><td>' + h.montant + '</td></tr>';
+  });
+  html += '</tbody></table>';
+  histContainer.innerHTML = html;
+}
+
+// ===================== TOAST =====================
+function showToast(message, type='success'){
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'toast toast-' + type;
+  toast.textContent = message;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+// ===================== AUTHENTIFICATION =====================
+async function login(){
+  const errorDiv = document.getElementById('login-error');
+  errorDiv.style.display = 'none';
+
+  if (isLoginLocked()){
+    const a = getLoginAttempts();
+    const minutesLeft = Math.ceil((new Date(a.lockUntil) - new Date()) / 60000);
+    errorDiv.style.display = 'block';
+    errorDiv.textContent = '⛔ Trop de tentatives échouées. Réessayez dans ' + minutesLeft + ' minute(s).';
+    return;
+  }
+
+  const username = normalizeIdentifiant(document.getElementById('login-username').value);
+  const password = document.getElementById('login-password').value.trim();
+  if (!username || !password){
+    errorDiv.style.display = 'block';
+    errorDiv.textContent = '⚠️ Veuillez remplir tous les champs obligatoires.';
+    return;
+  }
+  if (username.length < 5){
+    errorDiv.style.display = 'block';
+    errorDiv.textContent = '⚠️ Matricule invalide.';
+    return;
+  }
+
+  const btn = document.getElementById('login-submit-btn');
+  btn.disabled = true;
+
+  const account = findUserByMatricule(username);
+  const passwordHash = await sha256Hex(password);
+  const ok = account && account.active && passwordHash === account.passHash;
+
+  btn.disabled = false;
+
+  if (ok){
+    resetLoginAttempts();
+    const role = account.role;
+    session = {user: username, role: role, fullName: account.fullName, departement: account.departement || ''};
+    sessionStorage.setItem('drcia_session', JSON.stringify(session));
+    lastActivityAt = Date.now();
+    account.lastLoginAt = new Date().toISOString();
+    saveDB();
+    audit('CONNEXION', 'Ouverture de session par ' + username);
+    if (!licenceActive()){
+      showPaywall();
+      return;
+    }
+    document.getElementById('page-login').classList.remove('active');
+    document.getElementById('page-dashboard').classList.add('active');
+    document.getElementById('who-label').textContent = 'Déconnexion (' + role + ')';
+    initAllReferenceSelects();
+    applyRolePermissions();
+    showSection('dashboard-home');
+    updateTrialBanner();
+    restoreAllDrafts();
+    showToast('Connexion réussie. Bienvenue sur la plateforme DRCIA Hambol.', 'success');
+  } else {
+    registerFailedAttempt();
+    audit('CONNEXION_ECHOUEE', 'Tentative échouée pour ' + (username || '(vide)') + (account && !account.active ? ' (compte désactivé)' : ''));
+    errorDiv.style.display = 'block';
+    errorDiv.textContent = (account && !account.active) ? '⛔ Ce compte a été désactivé. Contactez un administrateur.' : '❌ Identifiant ou mot de passe incorrect. Veuillez réessayer.';
+  }
+}
+function logout(){
+  audit('DECONNEXION', 'Fermeture de session');
+  sessionStorage.removeItem('drcia_session');
+  session = {user:'', role:''};
+  document.getElementById('page-dashboard').classList.remove('active');
+  document.getElementById('page-login').classList.add('active');
+  showToast('Déconnexion effectuée avec succès.', 'info');
+}
+function openForgotModal(){ document.getElementById('forgot-modal').classList.add('show'); }
+function closeForgotModal(){ document.getElementById('forgot-modal').classList.remove('show'); }
+document.getElementById('login-password').addEventListener('keypress', e => { if (e.key === 'Enter') login(); });
+document.getElementById('login-username').addEventListener('keypress', e => { if (e.key === 'Enter') login(); });
+
+function closeGenericModal(){ document.getElementById('generic-modal').classList.remove('show'); }
+
+// ===================== NAVIGATION =====================
+function showSection(sectionId){
+  if (!licenceActive()){ showPaywall(); return; }
+  if (sectionId === 'section-utilisateurs' && !can('users:manage')){
+    showToast('Accès réservé au profil Administrateur.', 'error');
+    sectionId = 'dashboard-home';
+  }
+  document.querySelectorAll('#page-dashboard .section').forEach(s => s.style.display = 'none');
+  document.getElementById(sectionId).style.display = 'block';
+  document.querySelectorAll('.nav-link[data-section]').forEach(l => l.classList.remove('active'));
+  const link = document.querySelector('.nav-link[data-section="' + sectionId + '"]');
+  if (link) link.classList.add('active');
+
+  if (sectionId === 'dashboard-home') updateDashboard();
+  if (sectionId === 'section-operateurs') renderOperateurs();
+  if (sectionId === 'section-missions') renderMissions();
+  if (sectionId === 'section-bilan') initBilan();
+  if (sectionId === 'section-indicateurs') initIndicateurs();
+  if (sectionId === 'section-parametres') renderParametres();
+  if (sectionId === 'section-utilisateurs') { renderUsers(); renderMatrixTable(); }
+}
+
+function showParamTab(tabId){
+  document.querySelectorAll('.param-tab').forEach(t => t.style.display = 'none');
+  document.getElementById(tabId).style.display = 'block';
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
+  if (tabId === 'tab-audit') renderAuditTable();
+  if (tabId === 'tab-licence') renderLicenceTab();
+}
+
+// ===================== SELECTS DE REFERENCE =====================
+function fillSelect(id, values, withEmpty){
+  const el = document.getElementById(id);
+  const current = el.value;
+  el.innerHTML = (withEmpty ? '<option value="">— Sélectionnez —</option>' : '') +
+    values.map(v => '<option value="' + esc(v) + '">' + esc(v) + '</option>').join('');
+  if (values.includes(current)) el.value = current;
+}
+function initAllReferenceSelects(){
+  fillSelect('op-departement', db.params.departements, false);
+  fillSelect('op-activite', db.params.secteurs, false);
+  fillSelect('filter-op-dept', db.params.departements, false);
+  document.getElementById('filter-op-dept').insertAdjacentHTML('afterbegin', '<option value="">Tous les départements</option>');
+  fillSelect('ms-departement', db.params.departements, false);
+  fillSelect('ms-motif', db.params.motifs, false);
+  fillSelect('ms-statut', db.params.statuts, false);
+  fillSelect('ms-chef', db.params.chefsMission, true);
+  fillSelect('filter-ms-statut', db.params.statuts, false);
+  document.getElementById('filter-ms-statut').insertAdjacentHTML('afterbegin', '<option value="">Tous statuts</option>');
+  fillSelect('us-role', ROLES, false);
+  fillSelect('us-departement', db.params.departements, false);
+  clearOperateurForm();
+  clearMissionForm();
+  clearUserForm();
+}
+
+// ===================== OPERATEURS ECONOMIQUES =====================
+let opEditId = null;
+let opPhotoData = null;
+document.getElementById('op-photo-file').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    opPhotoData = ev.target.result;
+    document.getElementById('op-photo-frame').innerHTML = '<img src="' + opPhotoData + '">';
+  };
+  reader.readAsDataURL(file);
+});
+
+function clearOperateurForm(){
+  opEditId = null; opPhotoData = null;
+  ['op-numcni','op-nom','op-prenom','op-datenaissance','op-telephone','op-localite'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('op-sexe').value = 'Homme';
+  document.getElementById('op-nationalite').value = 'Ivoirien';
+  document.getElementById('op-departement').selectedIndex = 0;
+  document.getElementById('op-activite').selectedIndex = 0;
+  document.getElementById('op-photo-frame').innerHTML = '<span style="font-size:.65rem; color:#999; text-align:center;">Aperçu</span>';
+  document.getElementById('op-form-title').textContent = '📝 Nouvel opérateur';
+}
+
+function saveOperateur(){
+  if (!can('records:create')){ showToast('Votre profil ne permet pas la saisie d\'opérateurs.', 'error'); return; }
+  const numCni = document.getElementById('op-numcni').value.trim();
+  const nom = document.getElementById('op-nom').value.trim();
+  const prenom = document.getElementById('op-prenom').value.trim();
+  const sexe = document.getElementById('op-sexe').value;
+  const nationalite = document.getElementById('op-nationalite').value;
+  const dateNaissance = document.getElementById('op-datenaissance').value;
+  const telephone = document.getElementById('op-telephone').value.trim();
+  const departement = document.getElementById('op-departement').value;
+  const localite = document.getElementById('op-localite').value.trim();
+  const activite = document.getElementById('op-activite').value;
+
+  if (!numCni || !nom || !prenom || !departement || !activite){
+    showToast('Veuillez remplir tous les champs obligatoires (*).', 'error');
+    return;
+  }
+  if (telephone && !/^[0-9+\s()-]{6,}$/.test(telephone)){
+    showToast("Le numéro de téléphone n'est pas valide.", 'error');
+    return;
+  }
+
+  if (opEditId){
+    const idx = db.operateurs.findIndex(o => o.id === opEditId);
+    if (idx > -1){
+      db.operateurs[idx] = {...db.operateurs[idx], numCni, nom, prenom, sexe, nationalite, dateNaissance, telephone, departement, localite, activite, photo: opPhotoData || db.operateurs[idx].photo};
+    }
+    audit('MODIFICATION OPERATEUR', nom + ' ' + prenom);
+    showToast('Fiche opérateur modifiée avec succès.', 'success');
+  } else {
+    const record = {id: nextOperateurId(), numCni, nom, prenom, sexe, nationalite, dateNaissance, telephone, departement, localite, activite, photo: opPhotoData, createdBy: session.user, createdAt: new Date().toISOString()};
+    db.operateurs.push(record);
+    audit('CREATION OPERATEUR', nom + ' ' + prenom);
+    showToast('Opérateur "' + nom + ' ' + prenom + '" enregistré avec succès.', 'success');
+  }
+  saveDB();
+  clearAutosave('operateur');
+  clearOperateurForm();
+  renderOperateurs();
+}
+
+function editOperateur(id){
+  const o = db.operateurs.find(x => x.id === id);
+  if (!o) return;
+  opEditId = id;
+  document.getElementById('op-numcni').value = o.numCni;
+  document.getElementById('op-nom').value = o.nom;
+  document.getElementById('op-prenom').value = o.prenom;
+  document.getElementById('op-sexe').value = o.sexe;
+  document.getElementById('op-nationalite').value = o.nationalite;
+  document.getElementById('op-datenaissance').value = o.dateNaissance || '';
+  document.getElementById('op-telephone').value = o.telephone || '';
+  document.getElementById('op-departement').value = o.departement;
+  document.getElementById('op-localite').value = o.localite || '';
+  document.getElementById('op-activite').value = o.activite;
+  opPhotoData = o.photo || null;
+  document.getElementById('op-photo-frame').innerHTML = o.photo ? ('<img src="' + o.photo + '">') : '<span style="font-size:.65rem; color:#999; text-align:center;">Aperçu</span>';
+  document.getElementById('op-form-title').textContent = '✏️ Modifier l\'opérateur — ' + o.nom + ' ' + o.prenom;
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function deleteOperateur(id){
+  if (!can('records:delete')){ showToast('Action réservée au profil Administrateur.', 'error'); return; }
+  if (!confirm('Supprimer définitivement cet opérateur ?')) return;
+  const o = db.operateurs.find(x => x.id === id);
+  db.operateurs = db.operateurs.filter(x => x.id !== id);
+  saveDB();
+  audit('SUPPRESSION OPERATEUR', o ? (o.nom + ' ' + o.prenom) : id);
+  renderOperateurs();
+  showToast('Opérateur supprimé.', 'info');
+}
+
+function renderOperateurs(){
+  const search = document.getElementById('search-op').value.toLowerCase();
+  const deptFilter = document.getElementById('filter-op-dept').value;
+  let list = db.operateurs;
+  if (!hasGlobalView() && ['Agent de saisie','Contrôleur'].includes(session.role)) list = list.filter(o => o.createdBy === session.user);
+  if (search) list = list.filter(o => (o.nom+' '+o.prenom+' '+o.numCni+' '+o.activite+' '+o.localite).toLowerCase().includes(search));
+  if (deptFilter) list = list.filter(o => o.departement === deptFilter);
+
+  const container = document.getElementById('op-table-container');
+  if (list.length === 0){
+    container.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>Aucun opérateur trouvé.</p></div>';
+    document.getElementById('op-count-tag').textContent = '';
+    return;
+  }
+  let html = '<table class="data-table"><thead><tr><th>Photo</th><th>N° CNI</th><th>Nom &amp; Prénom</th><th>Sexe</th><th>Nationalité</th><th>Département</th><th>Localité</th><th>Activité</th><th>Téléphone</th><th>Actions</th></tr></thead><tbody>';
+  list.forEach(o => {
+    html += '<tr>' +
+      '<td>' + (o.photo ? '<img src="'+o.photo+'" style="width:32px;height:32px;border-radius:6px;object-fit:cover;">' : '—') + '</td>' +
+      '<td><strong style="color:var(--green-dark)">' + esc(o.numCni) + '</strong></td>' +
+      '<td>' + esc(o.nom) + ' ' + esc(o.prenom) + '</td>' +
+      '<td>' + esc(o.sexe) + '</td>' +
+      '<td><span class="badge" style="background:' + (o.nationalite==='Ivoirien'?'#e3f2fd;color:#0b74c9':'#fff3e0;color:#ef6c00') + '">' + esc(o.nationalite) + '</span></td>' +
+      '<td>' + esc(o.departement) + '</td>' +
+      '<td>' + esc(o.localite) + '</td>' +
+      '<td>' + esc(o.activite) + '</td>' +
+      '<td>' + esc(o.telephone || '—') + '</td>' +
+      '<td>' + (can('records:create') ? '<button onclick="editOperateur(\'' + o.id + '\')" class="btn-3d btn-green" style="padding:5px 10px; font-size:.72rem;">✎</button> ' : '') +
+      (can('records:delete') ? '<button onclick="deleteOperateur(\'' + o.id + '\')" class="btn-3d btn-red" style="padding:5px 10px; font-size:.72rem;">🗑️</button>' : (can('records:create') ? '' : '<span style="color:#bbb; font-size:.72rem;">Lecture seule</span>')) + '</td>' +
+      '</tr>';
+  });
+  html += '</tbody></table>';
+  container.innerHTML = html;
+  document.getElementById('op-count-tag').textContent = list.length + ' opérateur(s) affiché(s) sur ' + db.operateurs.length + ' au total.';
+}
+
+// ===================== MISSIONS & PROCES-VERBAUX =====================
+let msEditId = null;
+function autoCalcMontant(){
+  const qty = parseFloat(document.getElementById('ms-quantite').value) || 0;
+  const price = parseFloat(document.getElementById('ms-prix').value) || 0;
+  const total = qty * price;
+  document.getElementById('ms-montant').value = total > 0 ? total.toLocaleString('fr-FR') + ' FCFA' : '';
+}
+function clearMissionForm(){
+  msEditId = null;
+  ['ms-heure','ms-operateur','ms-produits','ms-lieu','ms-quantite','ms-prix','ms-montant','ms-observations'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('ms-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('ms-controleurs').value = 1;
+  document.getElementById('ms-nbpv').value = 1;
+  document.getElementById('ms-nbconv').value = 0;
+  document.getElementById('ms-departement').selectedIndex = 0;
+  document.getElementById('ms-motif').selectedIndex = 0;
+  document.getElementById('ms-chef').selectedIndex = 0;
+  document.getElementById('ms-statut').value = 'Planifiée';
+  document.getElementById('mission-form-title').textContent = '📝 Nouvelle mission / procès-verbal';
+  // Un Chef de mission reste verrouillé sur son propre nom / département même après réinitialisation
+  if (session.role === 'Chef de mission' && session.fullName){
+    const chefSelect = document.getElementById('ms-chef');
+    if (![...chefSelect.options].some(o => o.value === session.fullName)){
+      chefSelect.insertAdjacentHTML('beforeend', '<option value="' + esc(session.fullName) + '">' + esc(session.fullName) + '</option>');
+    }
+    chefSelect.value = session.fullName;
+    chefSelect.disabled = true;
+    document.getElementById('ms-departement').value = session.departement;
+    document.getElementById('ms-departement').disabled = true;
+  }
+}
+function saveMission(){
+  if (!can('records:create')){ showToast('Votre profil ne permet pas la saisie de dossiers.', 'error'); return; }
+  const date = document.getElementById('ms-date').value;
+  const heure = document.getElementById('ms-heure').value;
+  const chef = session.role === 'Chef de mission' ? session.fullName : document.getElementById('ms-chef').value;
+  const operateur = document.getElementById('ms-operateur').value.trim();
+  const produits = document.getElementById('ms-produits').value.trim();
+  // Un Chef de mission ne peut créer/modifier un dossier que dans SON propre département,
+  // quelle que soit la valeur envoyée par le formulaire (cf. cloisonnement recommandé).
+  const departement = session.role === 'Chef de mission' ? session.departement : document.getElementById('ms-departement').value;
+  const lieu = document.getElementById('ms-lieu').value.trim();
+  const controleurs = parseInt(document.getElementById('ms-controleurs').value) || 0;
+  const motif = document.getElementById('ms-motif').value;
+  const quantite = parseFloat(document.getElementById('ms-quantite').value) || 0;
+  const prix = parseFloat(document.getElementById('ms-prix').value) || 0;
+  const montant = quantite * prix;
+  const nbpv = parseInt(document.getElementById('ms-nbpv').value) || 0;
+  const nbconv = parseInt(document.getElementById('ms-nbconv').value) || 0;
+  const statut = document.getElementById('ms-statut').value;
+  const observations = document.getElementById('ms-observations').value.trim();
+
+  if (!date || !operateur || !departement || !motif){
+    showToast('Veuillez remplir tous les champs obligatoires (*).', 'error');
+    return;
+  }
+
+  if (msEditId){
+    const idx = db.missions.findIndex(m => m.id === msEditId);
+    if (idx > -1) db.missions[idx] = {...db.missions[idx], date, heure, chef, operateur, produits, departement, lieu, controleurs, motif, quantite, prix, montant, nbpv, nbconv, statut, observations};
+    audit('MODIFICATION MISSION', operateur);
+    showToast('Mission modifiée avec succès.', 'success');
+  } else {
+    const record = {id: nextMissionId(), date, heure, chef, operateur, produits, departement, lieu, controleurs, motif, quantite, prix, montant, nbpv, nbconv, statut, observations, createdBy: session.user, createdAt: new Date().toISOString()};
+    db.missions.push(record);
+    audit('CREATION MISSION', operateur);
+    showToast('Mission "' + record.id + '" enregistrée avec succès.', 'success');
+  }
+  saveDB();
+  clearAutosave('mission');
+  clearMissionForm();
+  renderMissions();
+}
+function editMission(id){
+  const m = db.missions.find(x => x.id === id);
+  if (!m) return;
+  if (!can('records:create') || (session.role === 'Chef de mission' && m.departement !== session.departement)){
+    showToast('Accès refusé à ce dossier.', 'error');
+    return;
+  }
+  msEditId = id;
+  document.getElementById('ms-date').value = m.date;
+  document.getElementById('ms-heure').value = m.heure || '';
+  document.getElementById('ms-chef').value = m.chef || '';
+  document.getElementById('ms-operateur').value = m.operateur;
+  document.getElementById('ms-produits').value = m.produits || '';
+  document.getElementById('ms-departement').value = m.departement;
+  document.getElementById('ms-lieu').value = m.lieu || '';
+  document.getElementById('ms-controleurs').value = m.controleurs || 0;
+  document.getElementById('ms-motif').value = m.motif;
+  document.getElementById('ms-quantite').value = m.quantite || '';
+  document.getElementById('ms-prix').value = m.prix || '';
+  autoCalcMontant();
+  document.getElementById('ms-nbpv').value = m.nbpv || 0;
+  document.getElementById('ms-nbconv').value = m.nbconv || 0;
+  document.getElementById('ms-statut').value = m.statut;
+  document.getElementById('ms-observations').value = m.observations || '';
+  document.getElementById('mission-form-title').textContent = '✏️ Modifier la mission — ' + m.id;
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function deleteMission(id){
+  if (!can('records:delete')){ showToast('Action réservée au profil Administrateur.', 'error'); return; }
+  if (!confirm('Supprimer définitivement cette mission ?')) return;
+  db.missions = db.missions.filter(m => m.id !== id);
+  saveDB();
+  audit('SUPPRESSION MISSION', id);
+  renderMissions();
+  showToast('Mission supprimée.', 'info');
+}
+function statutBadgeColor(v){
+  if (v === 'Réalisée' || v === 'Régularisée') return 'background:#e8f5e9;color:#1b5e20';
+  if (v === 'Planifiée') return 'background:#fff8e1;color:#956300';
+  if (v === 'Annulée') return 'background:#ffebee;color:#c62828';
+  return 'background:#e9f2ff;color:#175ea8';
+}
+function renderMissions(){
+  const search = document.getElementById('search-ms').value.toLowerCase();
+  const statutFilter = document.getElementById('filter-ms-statut').value;
+  let list = db.missions.slice().sort((a,b) => (b.date||'').localeCompare(a.date||''));
+  // Cloisonnement : un Chef de mission ne voit que les dossiers de son propre département
+  if (session.role === 'Chef de mission' && session.departement){
+    list = list.filter(m => m.departement === session.departement);
+  }
+  // Cloisonnement : un Agent de saisie / Contrôleur non autorisé ne voit que ses propres saisies
+  if (!hasGlobalView() && ['Agent de saisie','Contrôleur'].includes(session.role)){
+    list = list.filter(m => m.createdBy === session.user);
+  }
+  if (search) list = list.filter(m => (m.operateur+' '+m.lieu+' '+m.motif+' '+m.id).toLowerCase().includes(search));
+  if (statutFilter) list = list.filter(m => m.statut === statutFilter);
+
+  const container = document.getElementById('ms-table-container');
+  if (list.length === 0){
+    container.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>Aucune mission trouvée.</p></div>';
+    return;
+  }
+  let html = '<table class="data-table"><thead><tr><th>N° Mission</th><th>Date</th><th>Opérateur</th><th>Département</th><th>Motif</th><th>Montant</th><th>Statut</th><th>Actions</th></tr></thead><tbody>';
+  list.forEach(m => {
+    html += '<tr>' +
+      '<td><strong style="color:var(--green-dark)">' + esc(m.id) + '</strong></td>' +
+      '<td>' + esc(formatDate(m.date)) + '</td>' +
+      '<td>' + esc(m.operateur) + '</td>' +
+      '<td>' + esc(m.departement) + '</td>' +
+      '<td><span class="badge" style="background:#e8f5e9;color:var(--green-dark);">' + esc(m.motif) + '</span></td>' +
+      '<td><strong style="color:var(--red-main)">' + (m.montant||0).toLocaleString('fr-FR') + ' FCFA</strong></td>' +
+      '<td><span class="badge" style="' + statutBadgeColor(m.statut) + '">' + esc(m.statut) + '</span></td>' +
+      '<td>' + (can('records:create') ? '<button onclick="editMission(\'' + m.id + '\')" class="btn-3d btn-green" style="padding:5px 9px; font-size:.7rem;">✎</button> ' : '') +
+      (can('records:export') ? '<button onclick="generatePDF(\'' + m.id + '\')" class="btn-3d btn-blue" style="padding:5px 9px; font-size:.7rem;">📄 PDF</button> ' : '') +
+      (can('records:delete') ? '<button onclick="deleteMission(\'' + m.id + '\')" class="btn-3d btn-red" style="padding:5px 9px; font-size:.7rem;">🗑️</button>' : '') + '</td>' +
+      '</tr>';
+  });
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function generatePDF(id){
+  const m = db.missions.find(x => x.id === id);
+  if (!m){ showToast('Mission introuvable.', 'error'); return; }
+  document.getElementById('pv-number').textContent = 'N° ' + m.id;
+  document.getElementById('pv-nom').textContent = m.operateur;
+  document.getElementById('pv-activite').textContent = m.produits || '—';
+  document.getElementById('pv-lieu').textContent = m.departement + (m.lieu ? (' — ' + m.lieu) : '');
+  document.getElementById('pv-date').textContent = formatDate(m.date) + (m.heure ? (' à ' + m.heure) : '');
+  document.getElementById('pv-motif').textContent = m.motif;
+  document.getElementById('pv-chef').textContent = m.chef || '—';
+  document.getElementById('pv-quantite').textContent = (m.quantite || 0).toLocaleString('fr-FR');
+  document.getElementById('pv-montant').textContent = (m.montant || 0).toLocaleString('fr-FR') + ' FCFA';
+  document.getElementById('pv-conv').textContent = m.nbconv || 0;
+  document.getElementById('pv-statut').textContent = m.statut;
+  document.getElementById('pv-obs').textContent = m.observations || 'Néant';
+
+  const element = document.getElementById('pv-content');
+  const opt = { margin:0, filename: m.id + '_Proces-Verbal.pdf', image:{type:'jpeg', quality:.98}, html2canvas:{scale:2, useCORS:true}, jsPDF:{unit:'mm', format:'a4', orientation:'portrait'} };
+  showToast('Génération du PDF en cours...', 'info');
+  html2pdf().set(opt).from(element).save().then(() => {
+    audit('EXPORT PV', m.id);
+    showToast('PV "' + m.id + '" téléchargé avec succès.', 'success');
+  });
+}
+
+function formatDate(dateStr){
+  if (!dateStr) return '-';
+  const parts = dateStr.split('-');
+  if (parts.length < 3) return dateStr;
+  const d = new Date(parts[0], parts[1]-1, parts[2]);
+  const months = ['janv.','fév.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+  return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+}
+
+// ===================== TABLEAU DE BORD EXECUTIF (moteur de calculs) =====================
+let dashCharts = {};
+function updateDashboard(){
+  const ops = db.operateurs;
+  const total = ops.length;
+  const ivoiriens = ops.filter(o => o.nationalite === 'Ivoirien').length;
+  const nonIvoiriens = total - ivoiriens;
+
+  document.getElementById('kpi-total-op').textContent = total;
+  document.getElementById('kpi-pct-ivoirien').textContent = total ? Math.round(ivoiriens/total*100) + '%' : '0%';
+  document.getElementById('kpi-pct-non-ivoirien').textContent = total ? Math.round(nonIvoiriens/total*100) + '%' : '0%';
+
+  // 1) Répartition territoriale par département et nationalité
+  const depts = db.params.departements;
+  const deptIvoirien = depts.map(d => ops.filter(o => o.departement === d && o.nationalite === 'Ivoirien').length);
+  const deptNonIvoirien = depts.map(d => ops.filter(o => o.departement === d && o.nationalite === 'Non Ivoirien').length);
+  const deptTotal = depts.map((d,i) => deptIvoirien[i] + deptNonIvoirien[i]);
+  const maxIdx = deptTotal.indexOf(Math.max(...deptTotal, 0));
+  document.getElementById('kpi-dept-actif').textContent = total && deptTotal[maxIdx] > 0 ? depts[maxIdx] : '—';
+
+  if (dashCharts.dept) dashCharts.dept.destroy();
+  dashCharts.dept = new Chart(document.getElementById('chart-dept'), {
+    type:'bar',
+    data:{ labels: depts, datasets:[
+      {label:'Ivoiriens', data:deptIvoirien, backgroundColor:'rgba(11,116,201,.75)', borderRadius:6},
+      {label:'Non Ivoiriens', data:deptNonIvoirien, backgroundColor:'rgba(239,108,0,.75)', borderRadius:6}
+    ]},
+    options:{ responsive:true, plugins:{legend:{position:'bottom'}}, scales:{ x:{stacked:true, grid:{display:false}}, y:{stacked:true, beginAtZero:true, ticks:{stepSize:1}} } }
+  });
+
+  if (dashCharts.ratio) dashCharts.ratio.destroy();
+  dashCharts.ratio = new Chart(document.getElementById('chart-ratio'), {
+    type:'doughnut',
+    data:{ labels:['Ivoiriens','Non Ivoiriens'], datasets:[{ data:[ivoiriens, nonIvoiriens], backgroundColor:['#0b74c9','#ef6c00'], borderWidth:3, borderColor:'#fff' }] },
+    options:{ responsive:true, plugins:{legend:{position:'bottom'}} }
+  });
+
+  // 2) Répartition sectorielle
+  const secteurs = db.params.secteurs;
+  const secteurCounts = secteurs.map(s => ops.filter(o => o.activite === s).length);
+  if (dashCharts.secteur) dashCharts.secteur.destroy();
+  dashCharts.secteur = new Chart(document.getElementById('chart-secteur'), {
+    type:'bar',
+    data:{ labels:secteurs, datasets:[{ label:"Nombre d'opérateurs", data:secteurCounts, backgroundColor:'rgba(46,125,50,.75)', borderRadius:5 }] },
+    options:{ indexAxis:'y', responsive:true, plugins:{legend:{display:false}}, scales:{ x:{beginAtZero:true, ticks:{stepSize:1}} } }
+  });
+
+  // Disparité territoriale (% non-nationaux par département)
+  const disparite = depts.map((d,i) => deptTotal[i] > 0 ? Math.round(deptNonIvoirien[i]/deptTotal[i]*100) : 0);
+  if (dashCharts.disparite) dashCharts.disparite.destroy();
+  dashCharts.disparite = new Chart(document.getElementById('chart-disparite'), {
+    type:'bar',
+    data:{ labels:depts, datasets:[{ label:'% Non Ivoiriens', data:disparite, backgroundColor:'rgba(198,40,40,.7)', borderRadius:6 }] },
+    options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true, max:100, ticks:{callback:v=>v+'%'}} } }
+  });
+
+  // 3) Contrôle de cohérence et d'audit
+  const totalVentileDept = deptTotal.reduce((a,b)=>a+b,0);
+  const totalVentileSecteur = secteurCounts.reduce((a,b)=>a+b,0);
+  const orphelinsActivite = ops.filter(o => !secteurs.includes(o.activite)).length;
+  const orphelinsDept = ops.filter(o => !depts.includes(o.departement)).length;
+  const checks = [
+    {label:'Total général (Opérateurs enregistrés)', valeur:total, ref:total, ok:true},
+    {label:'Total ventilé par département', valeur:totalVentileDept, ref:total, ok:totalVentileDept===total},
+    {label:'Total ventilé par secteur', valeur:totalVentileSecteur, ref:total, ok:totalVentileSecteur===total},
+    {label:"Libellés 'Activité menée' non conformes (orphelins)", valeur:orphelinsActivite, ref:0, ok:orphelinsActivite===0},
+    {label:'Départements hors liste de référence (orphelins)', valeur:orphelinsDept, ref:0, ok:orphelinsDept===0}
+  ];
+  let cHtml = '<table class="data-table"><thead><tr><th>Vérification</th><th>Valeur</th><th>Référence</th><th>Statut</th></tr></thead><tbody>';
+  checks.forEach(c => {
+    cHtml += '<tr><td>' + esc(c.label) + '</td><td><strong>' + c.valeur + '</strong></td><td>' + c.ref + '</td><td><span class="badge" style="' + (c.ok ? 'background:#e8f5e9;color:#1b5e20' : 'background:#ffebee;color:#c62828') + '">' + (c.ok ? '✔ OK' : '⚠ Écart détecté') + '</span></td></tr>';
+  });
+  cHtml += '</tbody></table>';
+  document.getElementById('coherence-table-container').innerHTML = cHtml;
+}
+
+// ===================== BILAN ANNUEL =====================
+let bilanCharts = {};
+function initBilan(){
+  const yearSelect = document.getElementById('bilan-annee');
+  const currentYear = new Date().getFullYear();
+  const years = new Set(db.missions.map(m => parseInt((m.date||'').split('-')[0])).filter(y => !isNaN(y)));
+  years.add(currentYear);
+  const yearOptions = Array.from(years).sort((a,b) => b-a);
+  yearSelect.innerHTML = '';
+  yearOptions.forEach(y => {
+    const opt = document.createElement('option');
+    opt.value = y; opt.textContent = y;
+    if (y === currentYear) opt.selected = true;
+    yearSelect.appendChild(opt);
+  });
+  updateBilan();
+}
+function updateBilan(){
+  const year = parseInt(document.getElementById('bilan-annee').value);
+  const missions = db.missions.filter(m => parseInt((m.date||'').split('-')[0]) === year);
+  const months = ['Janv','Fév','Mars','Avr','Mai','Juin','Juil','Août','Sept','Oct','Nov','Déc'];
+  const monthlyCount = new Array(12).fill(0);
+  const monthlyAmount = new Array(12).fill(0);
+  missions.forEach(m => { const mo = parseInt((m.date||'').split('-')[1]) - 1; if (mo>=0 && mo<12){ monthlyCount[mo]++; monthlyAmount[mo] += (m.montant||0); } });
+
+  const motifCount = {}; missions.forEach(m => { motifCount[m.motif] = (motifCount[m.motif]||0)+1; });
+  const deptCount = {}; missions.forEach(m => { deptCount[m.departement] = (deptCount[m.departement]||0)+1; });
+
+  Object.values(bilanCharts).forEach(c => c.destroy());
+  bilanCharts = {};
+
+  bilanCharts.mensuel = new Chart(document.getElementById('chart-mensuel'), {
+    type:'bar', data:{ labels:months, datasets:[{ label:'Nombre de missions', data:monthlyCount, backgroundColor:'rgba(46,125,50,.7)', borderColor:'#1b5e20', borderWidth:2, borderRadius:8 }] },
+    options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true, ticks:{stepSize:1}}, x:{grid:{display:false}} } }
+  });
+  bilanCharts.montants = new Chart(document.getElementById('chart-montants'), {
+    type:'line', data:{ labels:months, datasets:[{ label:'Montant (millions FCFA)', data:monthlyAmount.map(v=>Math.round(v/1000000*100)/100), borderColor:'#c62828', backgroundColor:'rgba(198,40,40,.1)', fill:true, tension:.4, pointRadius:5, pointBackgroundColor:'#c62828', borderWidth:3 }] },
+    options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true, ticks:{callback:v=>v.toFixed(1)+' M'}}, x:{grid:{display:false}} } }
+  });
+  const motifLabels = Object.keys(motifCount), motifValues = Object.values(motifCount);
+  const palette = ['#1b5e20','#c62828','#ef6c00','#00897b','#4527a0','#ad1457','#00695c','#6a1b9a','#d84315','#f9a825'];
+  bilanCharts.motifs = new Chart(document.getElementById('chart-motifs'), {
+    type:'doughnut', data:{ labels: motifLabels.length? motifLabels : ['Aucune donnée'], datasets:[{ data: motifValues.length? motifValues : [1], backgroundColor: motifValues.length? palette.slice(0,motifLabels.length) : ['#ccc'], borderWidth:3, borderColor:'#fff' }] },
+    options:{ responsive:true, plugins:{legend:{position:'bottom', labels:{padding:12, font:{size:10}}}} }
+  });
+  const deptLabels = Object.keys(deptCount), deptValues = Object.values(deptCount);
+  bilanCharts.lieux = new Chart(document.getElementById('chart-lieux'), {
+    type:'polarArea', data:{ labels: deptLabels.length? deptLabels : ['Aucune donnée'], datasets:[{ data: deptValues.length? deptValues : [1], backgroundColor: (deptValues.length? palette.slice(0,deptLabels.length) : ['#ccc']).map(c=>c+'aa'), borderWidth:2, borderColor:'#fff' }] },
+    options:{ responsive:true, plugins:{legend:{position:'bottom', labels:{padding:12, font:{size:10}}}} }
+  });
+
+  const totalMontant = missions.reduce((s,m)=>s+(m.montant||0),0);
+  const totalQuantite = missions.reduce((s,m)=>s+(m.quantite||0),0);
+  let tHtml = '<table class="data-table"><thead><tr><th>Mois</th><th>Missions</th><th>Quantité saisie</th><th>Montant total (FCFA)</th><th>% du total</th></tr></thead><tbody>';
+  months.forEach((month,i) => {
+    const pct = totalMontant>0 ? (monthlyAmount[i]/totalMontant*100).toFixed(1) : '0.0';
+    tHtml += '<tr><td><strong>'+month+' '+year+'</strong></td><td>'+monthlyCount[i]+'</td><td>'+'—'+'</td><td><strong>'+monthlyAmount[i].toLocaleString('fr-FR')+'</strong></td><td><span class="badge" style="'+(parseFloat(pct)>20?'background:#ffebee;color:#c62828':'background:#e8f5e9;color:#1b5e20')+'">'+pct+'%</span></td></tr>';
+  });
+  tHtml += '<tr style="background:var(--green-pale) !important;"><td><strong>TOTAL '+year+'</strong></td><td><strong>'+missions.length+'</strong></td><td><strong>'+totalQuantite.toLocaleString('fr-FR')+'</strong></td><td><strong style="color:var(--red-main)">'+totalMontant.toLocaleString('fr-FR')+' FCFA</strong></td><td><span class="badge" style="background:#1b5e20;color:#fff;">100%</span></td></tr>';
+  tHtml += '</tbody></table>';
+  document.getElementById('bilan-table-container').innerHTML = tHtml;
+}
+
+// ===================== INDICATEURS D'ACTIVITE DR — affichage & saisie =====================
+function initIndicateurs(){
+  const sel = document.getElementById('ind-annee');
+  if (sel.options.length === 0){
+    sel.innerHTML = IND_ANNEES.map(y => '<option value="'+y+'">'+y+'</option>').join('');
+  }
+  renderIndicateurGroups();
+  loadIndicateurYear();
+  renderIndicateursTable();
+  const editable = can('params:manage');
+  document.getElementById('ind-form-section').style.display = editable ? '' : 'none';
+  document.getElementById('ind-readonly-note').style.display = editable ? 'none' : 'block';
+}
+
+function renderIndicateurGroups(){
+  const container = document.getElementById('ind-groups-container');
+  let html = '';
+  IND_GROUPS.forEach(group => {
+    html += '<div style="margin-bottom:1.2rem;"><h3 style="font-size:.85rem; color:var(--green-dark); font-weight:700; margin-bottom:.6rem; padding-bottom:.3rem; border-bottom:1px solid #e0e0e0;">' + group.title + '</h3>';
+    html += '<div class="form-grid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:1rem;">';
+    group.fields.forEach(f => {
+      html += '<div><label class="form-label" style="font-size:.72rem; min-height:2.4em; display:block;">' + esc(f.label) + '</label><input type="number" min="0" step="any" id="ind-f-' + f.key + '" class="input-3d" value="0"></div>';
+    });
+    html += '</div></div>';
+  });
+  container.innerHTML = html;
+}
+
+function loadIndicateurYear(){
+  const year = document.getElementById('ind-annee').value;
+  const row = db.indicateurs[year] || {};
+  IND_FIELDS.forEach(f => {
+    const el = document.getElementById('ind-f-' + f.key);
+    if (el) el.value = row[f.key] != null ? row[f.key] : 0;
+  });
+}
+
+function saveIndicateurYear(){
+  if (!can('params:manage')){ showToast('Action réservée au profil Administrateur.', 'error'); return; }
+  const year = document.getElementById('ind-annee').value;
+  const row = {};
+  IND_FIELDS.forEach(f => {
+    const el = document.getElementById('ind-f-' + f.key);
+    row[f.key] = el ? (parseFloat(el.value) || 0) : 0;
+  });
+  db.indicateurs[year] = row;
+  saveDB();
+  audit('INDICATEURS', 'Mise à jour des indicateurs DR pour l\'année ' + year);
+  renderIndicateursTable();
+  showToast('Indicateurs de l\'année ' + year + ' enregistrés.', 'success');
+}
+
+function clearIndicateurYear(){
+  if (!can('params:manage')){ showToast('Action réservée au profil Administrateur.', 'error'); return; }
+  IND_FIELDS.forEach(f => { const el = document.getElementById('ind-f-' + f.key); if (el) el.value = 0; });
+}
+
+function indicateurTotal(key){
+  return IND_ANNEES.reduce((sum, y) => sum + ((db.indicateurs[y] || {})[key] || 0), 0);
+}
+
+function renderIndicateursTable(){
+  const container = document.getElementById('ind-table-container');
+  if (!container) return;
+  let html = '<table class="data-table"><thead><tr><th style="position:sticky; left:0; background:var(--green-dark); z-index:1;">Année</th><th>DR</th>';
+  IND_FIELDS.forEach(f => html += '<th style="white-space:nowrap; font-size:.68rem;">' + esc(f.label) + '</th>');
+  html += '</tr></thead><tbody>';
+  IND_ANNEES.forEach(y => {
+    const row = db.indicateurs[y] || {};
+    const hasData = IND_FIELDS.some(f => (row[f.key] || 0) !== 0);
+    html += '<tr' + (hasData ? '' : ' style="color:#bbb;"') + '><td style="position:sticky; left:0; background:#fff; font-weight:700; color:var(--green-dark);">' + y + '</td><td>' + esc(IND_DR_NOM) + '</td>';
+    IND_FIELDS.forEach(f => html += '<td>' + (row[f.key] || 0).toLocaleString('fr-FR') + '</td>');
+    html += '</tr>';
+  });
+  html += '<tr style="background:var(--green-pale) !important; font-weight:700;"><td style="position:sticky; left:0; background:var(--green-pale);">TOTAL</td><td>' + esc(IND_DR_NOM) + '</td>';
+  IND_FIELDS.forEach(f => html += '<td>' + indicateurTotal(f.key).toLocaleString('fr-FR') + '</td>');
+  html += '</tr>';
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+// ===================== EXPORTS PAR SECTEUR (EXCEL / PDF) =====================
+// Chaque export ne porte que sur les données actuellement visibles à
+// l'écran (donc déjà filtrées par recherche ET par la portée des droits de
+// l'utilisateur connecté — un agent sans vue globale n'exporte jamais que
+// ses propres saisies).
+function csvDownload(filename, rows){
+  const csv = '\uFEFF' + rows.map(row => row.map(v => '"' + String(v ?? '').replace(/"/g,'""') + '"').join(';')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+function exportOperateursCSV(){
+  const search = document.getElementById('search-op').value.toLowerCase();
+  const deptFilter = document.getElementById('filter-op-dept').value;
+  let list = db.operateurs;
+  if (!hasGlobalView() && ['Agent de saisie','Contrôleur'].includes(session.role)) list = list.filter(o => o.createdBy === session.user);
+  if (search) list = list.filter(o => (o.nom+' '+o.prenom+' '+o.numCni+' '+o.activite+' '+o.localite).toLowerCase().includes(search));
+  if (deptFilter) list = list.filter(o => o.departement === deptFilter);
+  const rows = [['N° CNI','Nom','Prénom','Sexe','Nationalité','Département','Localité','Activité','Téléphone']];
+  list.forEach(o => rows.push([o.numCni,o.nom,o.prenom,o.sexe,o.nationalite,o.departement,o.localite,o.activite,o.telephone||'']));
+  csvDownload('DRCIA-Hambol_Operateurs.csv', rows);
+  audit('EXPORT', 'Export Excel (CSV) des opérateurs — ' + list.length + ' ligne(s)');
+  showToast('Export Excel des opérateurs généré (' + list.length + ' ligne(s)).', 'success');
+}
+function exportMissionsCSV(){
+  const search = document.getElementById('search-ms').value.toLowerCase();
+  const statutFilter = document.getElementById('filter-ms-statut').value;
+  let list = db.missions.slice().sort((a,b) => (b.date||'').localeCompare(a.date||''));
+  if (session.role === 'Chef de mission' && session.departement) list = list.filter(m => m.departement === session.departement);
+  if (!hasGlobalView() && ['Agent de saisie','Contrôleur'].includes(session.role)) list = list.filter(m => m.createdBy === session.user);
+  if (search) list = list.filter(m => (m.operateur+' '+m.lieu+' '+m.motif+' '+m.id).toLowerCase().includes(search));
+  if (statutFilter) list = list.filter(m => m.statut === statutFilter);
+  const rows = [['N° dossier','Date','Heure','Chef de mission','Opérateur','Produits/activité','Département','Lieu','Motif','Quantité','Montant (FCFA)','Statut','Observations']];
+  list.forEach(m => rows.push([m.id,m.date,m.heure,m.chef,m.operateur,m.produits,m.departement,m.lieu,m.motif,m.quantite,m.montant,m.statut,m.observations]));
+  csvDownload('DRCIA-Hambol_Missions.csv', rows);
+  audit('EXPORT', 'Export Excel (CSV) des missions — ' + list.length + ' ligne(s)');
+  showToast('Export Excel des missions généré (' + list.length + ' ligne(s)).', 'success');
+}
+
+// Impression PDF générique d'un tableau de secteur, avec en-tête institutionnel,
+// à partir du tableau déjà affiché (donc déjà filtré selon les droits en cours).
+function exportSectorPDF(containerId, title, filePrefix){
+  const container = document.getElementById(containerId);
+  const table = container.querySelector('table');
+  if (!table){ showToast('Aucune donnée à imprimer pour ce secteur.', 'error'); return; }
+
+  const wrapper = document.createElement('div');
+  wrapper.style.cssText = 'width:297mm; padding:12mm 14mm; font-family:Arial,sans-serif; background:#fff; color:#000;';
+  wrapper.innerHTML =
+    '<div style="text-align:center; border-bottom:3px double #1b5e20; padding-bottom:10px; margin-bottom:14px;">' +
+      '<div style="font-size:9pt; letter-spacing:2px; color:#333;">RÉPUBLIQUE DE CÔTE D\'IVOIRE — Union — Discipline — Travail</div>' +
+      '<div style="font-size:12pt; font-weight:bold; color:#1b5e20; margin-top:4px;">MINISTÈRE DU COMMERCE, DE L\'INDUSTRIE ET DE L\'ARTISANAT</div>' +
+      '<div style="font-size:10pt; color:#333;">Direction Régionale du Commerce, de l\'Industrie et de l\'Artisanat — Région du Hambol</div>' +
+    '</div>' +
+    '<div style="text-align:center; margin-bottom:14px;">' +
+      '<div style="font-size:13pt; font-weight:bold; color:#1b5e20; text-decoration:underline;">' + title + '</div>' +
+      '<div style="font-size:9pt; color:#666; margin-top:4px;">Édité le ' + new Date().toLocaleString('fr-FR') + ' par ' + esc(session.user) + ' (' + esc(session.role) + ')</div>' +
+    '</div>';
+  const tableClone = table.cloneNode(true);
+  tableClone.style.width = '100%';
+  tableClone.style.fontSize = '8.5pt';
+  tableClone.style.borderCollapse = 'collapse';
+  tableClone.querySelectorAll('th,td').forEach(cell => { cell.style.border = '1px solid #999'; cell.style.padding = '4px 6px'; });
+  // Retirer la colonne "Actions" (boutons non pertinents à l'impression)
+  const headerCells = tableClone.querySelectorAll('thead th');
+  let actionsIdx = -1;
+  headerCells.forEach((th, i) => { if (th.textContent.trim() === 'Actions') actionsIdx = i; });
+  if (actionsIdx > -1){
+    tableClone.querySelectorAll('tr').forEach(tr => { if (tr.children[actionsIdx]) tr.removeChild(tr.children[actionsIdx]); });
+  }
+  wrapper.appendChild(tableClone);
+  wrapper.insertAdjacentHTML('beforeend', '<div style="margin-top:18px; font-size:8pt; color:#666; text-align:center; border-top:1px solid #ccc; padding-top:8px;">Direction Régionale du Commerce, de l\'Industrie et de l\'Artisanat — Région du Hambol · Document généré informatiquement — Plateforme Intégrée DRCIA Hambol</div>');
+
+  wrapper.style.position = 'absolute'; wrapper.style.left = '-9999px'; wrapper.style.top = '0';
+  document.body.appendChild(wrapper);
+  const opt = { margin:6, filename: 'DRCIA-Hambol_' + filePrefix + '.pdf', image:{type:'jpeg', quality:.98}, html2canvas:{scale:2, useCORS:true}, jsPDF:{unit:'mm', format:'a4', orientation:'landscape'} };
+  showToast('Génération du PDF en cours...', 'info');
+  html2pdf().set(opt).from(wrapper).save().then(() => {
+    document.body.removeChild(wrapper);
+    audit('EXPORT', 'Export PDF — ' + title);
+    showToast('PDF "' + title + '" téléchargé avec succès.', 'success');
+  });
+}
+
+function exportIndicateursCSV(){
+  let csv = '\uFEFF' + ['N°','DR', ...IND_FIELDS.map(f => f.label)].map(v => '"' + v.replace(/"/g,'""') + '"').join(';') + '\n';
+  IND_ANNEES.forEach(y => {
+    const row = db.indicateurs[y] || {};
+    csv += [y, IND_DR_NOM, ...IND_FIELDS.map(f => row[f.key] || 0)].map(v => '"' + String(v).replace(/"/g,'""') + '"').join(';') + '\n';
+  });
+  const totalRow = ['TOTAL', IND_DR_NOM, ...IND_FIELDS.map(f => indicateurTotal(f.key))];
+  csv += totalRow.map(v => '"' + String(v).replace(/"/g,'""') + '"').join(';') + '\n';
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'indicateurs_activites_dr_' + IND_DR_NOM.replace(/[^a-zA-Z0-9]/g,'_') + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  audit('EXPORT', 'Export CSV des indicateurs d\'activité DR');
+  showToast('Export CSV généré.', 'success');
+}
+
+// ===================== APPLICATION DES DROITS A L'INTERFACE =====================
+// Rappel : ceci n'est qu'un confort d'affichage. Dans une version avec vrai
+// backend, ces mêmes règles doivent être appliquées et vérifiées côté serveur
+// sur CHAQUE requête (voir Paramètres > Sécurité & feuille de route).
+function applyRolePermissions(){
+  const readOnly = !can('records:create');
+  document.getElementById('nav-utilisateurs').style.display = can('users:manage') ? '' : 'none';
+
+  const banner = document.getElementById('scope-banner');
+  if (banner && session.role){
+    banner.style.display = 'block';
+    banner.textContent = (ROLE_SCOPE_LABEL[session.role] || '') + (session.departement ? ' — ' + session.departement : '');
+  }
+
+  // Formulaires de saisie masqués pour les profils en lecture seule (Directeur, Sous-directeur, Inspecteur)
+  const opForm = document.getElementById('op-form-title');
+  if (opForm) opForm.closest('.form-section').style.display = readOnly ? 'none' : '';
+  const msForm = document.getElementById('mission-form-title');
+  if (msForm) msForm.closest('.form-section').style.display = readOnly ? 'none' : '';
+
+  // Verrouillage du champ "Chef de mission" pour un Chef de mission : il saisit toujours en son propre nom
+  const chefSelect = document.getElementById('ms-chef');
+  if (chefSelect){
+    if (session.role === 'Chef de mission'){
+      if (session.fullName && ![...chefSelect.options].some(o => o.value === session.fullName)){
+        chefSelect.insertAdjacentHTML('beforeend', '<option value="' + esc(session.fullName) + '">' + esc(session.fullName) + '</option>');
+      }
+      chefSelect.value = session.fullName;
+      chefSelect.disabled = true;
+    } else {
+      chefSelect.disabled = false;
+    }
+  }
+  // Même verrouillage pour le département : un Chef de mission ne saisit que dans son périmètre
+  const deptSelect = document.getElementById('ms-departement');
+  if (deptSelect){
+    if (session.role === 'Chef de mission' && session.departement){
+      deptSelect.value = session.departement;
+      deptSelect.disabled = true;
+    } else {
+      deptSelect.disabled = false;
+    }
+  }
+
+  renderOperateurs();
+  renderMissions();
+}
+
+// ===================== UTILISATEURS / TABLE D'INSCRIPTION =====================
+function toggleUserDeptField(){
+  const role = document.getElementById('us-role').value;
+  document.getElementById('us-dept-wrap').style.display = (role === 'Chef de mission') ? '' : 'none';
+}
+let userEditMatricule = null;
+function clearUserForm(){
+  userEditMatricule = null;
+  const nomEl = document.getElementById('us-nom'), matEl = document.getElementById('us-matricule'), pwEl = document.getElementById('us-password');
+  if (nomEl) nomEl.value = '';
+  if (matEl){ matEl.value = ''; matEl.disabled = false; }
+  if (pwEl) pwEl.value = '';
+  const actifEl = document.getElementById('us-actif');
+  if (actifEl) actifEl.value = 'true';
+  const titleEl = document.getElementById('user-form-title');
+  if (titleEl) titleEl.textContent = '📝 Inscrire un utilisateur';
+  toggleUserDeptField();
+}
+function saveUser(){
+  if (!can('users:manage')){ showToast('Action réservée au profil Administrateur.', 'error'); return; }
+  const matricule = normalizeIdentifiant(document.getElementById('us-matricule').value);
+  const fullName = document.getElementById('us-nom').value.trim();
+  const role = document.getElementById('us-role').value;
+  const departement = document.getElementById('us-departement').value;
+  const password = document.getElementById('us-password').value.trim();
+  const active = document.getElementById('us-actif').value === 'true';
+
+  if (!matricule || matricule.length < 5 || !fullName || !role){
+    showToast('Veuillez renseigner un matricule (5 caractères minimum), un nom et un rôle.', 'error');
+    return;
+  }
+  if (role === 'Chef de mission' && !departement){
+    showToast('Un Chef de mission doit être rattaché à un département.', 'error');
+    return;
+  }
+  const existing = findUserByMatricule(matricule);
+  if (!userEditMatricule && existing){
+    showToast('Ce matricule est déjà utilisé par un autre compte.', 'error');
+    return;
+  }
+  if (!userEditMatricule && !password){
+    showToast('Un mot de passe temporaire est requis à l\'inscription.', 'error');
+    return;
+  }
+
+  (async () => {
+    if (userEditMatricule){
+      const u = findUserByMatricule(userEditMatricule);
+      if (!u){ showToast('Utilisateur introuvable.', 'error'); return; }
+      u.fullName = fullName; u.role = role; u.departement = role === 'Chef de mission' ? departement : '';
+      u.active = active;
+      if (password) u.passHash = await sha256Hex(password);
+      audit('UTILISATEUR', 'Modification du compte ' + matricule);
+      showToast('Compte mis à jour.', 'success');
+    } else {
+      db.users.push({
+        matricule, fullName, role,
+        departement: role === 'Chef de mission' ? departement : '',
+        passHash: await sha256Hex(password),
+        active, createdAt: new Date().toISOString(), lastLoginAt: null
+      });
+      audit('UTILISATEUR', 'Inscription du compte ' + matricule + ' (' + role + ')');
+      showToast('Utilisateur inscrit avec succès.', 'success');
+    }
+    // Un Chef de mission inscrit ici doit apparaître dans le référentiel "Chefs de mission"
+    // utilisé par le formulaire de saisie des dossiers (sinon les autres profils ne
+    // pourraient pas lui attribuer de mission).
+    if (role === 'Chef de mission' && fullName && !db.params.chefsMission.includes(fullName)){
+      db.params.chefsMission.push(fullName);
+      db.params.chefsMission.sort();
+    }
+    saveDB();
+    clearUserForm();
+    renderUsers();
+    initAllReferenceSelects();
+  })();
+}
+function editUser(matricule){
+  const u = findUserByMatricule(matricule);
+  if (!u) return;
+  userEditMatricule = matricule;
+  document.getElementById('us-matricule').value = u.matricule;
+  document.getElementById('us-matricule').disabled = true;
+  document.getElementById('us-nom').value = u.fullName;
+  document.getElementById('us-role').value = u.role;
+  document.getElementById('us-password').value = '';
+  document.getElementById('us-actif').value = String(!!u.active);
+  toggleUserDeptField();
+  if (u.departement) document.getElementById('us-departement').value = u.departement;
+  document.getElementById('user-form-title').textContent = '✎ Modifier le compte ' + u.matricule;
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function toggleUserActive(matricule){
+  const u = findUserByMatricule(matricule);
+  if (!u) return;
+  if (u.matricule === session.user && u.active){
+    showToast('Vous ne pouvez pas désactiver votre propre compte pendant que vous êtes connecté.', 'error');
+    return;
+  }
+  u.active = !u.active;
+  audit('UTILISATEUR', (u.active ? 'Activation' : 'Désactivation') + ' du compte ' + matricule);
+  saveDB();
+  renderUsers();
+  showToast('Compte ' + (u.active ? 'activé' : 'désactivé') + '.', 'info');
+}
+function deleteUser(matricule){
+  if (matricule === session.user){ showToast('Vous ne pouvez pas supprimer votre propre compte.', 'error'); return; }
+  if (!confirm('Supprimer définitivement le compte ' + matricule + ' ?')) return;
+  db.users = db.users.filter(u => u.matricule !== matricule);
+  audit('UTILISATEUR', 'Suppression du compte ' + matricule);
+  saveDB();
+  renderUsers();
+  showToast('Compte supprimé.', 'success');
+}
+function renderUsers(){
+  const container = document.getElementById('us-table-container');
+  if (!container) return;
+  const search = (document.getElementById('search-us').value || '').toLowerCase();
+  let list = (db.users || []).slice().sort((a,b) => a.matricule.localeCompare(b.matricule));
+  if (search) list = list.filter(u => (u.matricule+' '+u.fullName+' '+u.role).toLowerCase().includes(search));
+
+  if (list.length === 0){
+    container.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>Aucun utilisateur trouvé.</p></div>';
+    document.getElementById('us-count-tag').textContent = '';
+    return;
+  }
+  let html = '<table class="data-table"><thead><tr><th>Matricule</th><th>Nom complet</th><th>Rôle</th><th>Périmètre</th><th>Statut</th><th>Dernière connexion</th><th>Actions</th></tr></thead><tbody>';
+  list.forEach(u => {
+    html += '<tr>' +
+      '<td><strong style="color:var(--green-dark)">' + esc(u.matricule) + '</strong></td>' +
+      '<td>' + esc(u.fullName) + '</td>' +
+      '<td>' + esc(u.role) + '</td>' +
+      '<td>' + esc(u.departement || 'Toute la région') + '</td>' +
+      '<td><span class="badge" style="background:' + (u.active ? '#e8f5e9;color:#1b5e20' : '#ffebee;color:#c62828') + '">' + (u.active ? 'Actif' : 'Désactivé') + '</span></td>' +
+      '<td>' + (u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleString('fr-FR') : '—') + '</td>' +
+      '<td><button onclick="editUser(\'' + u.matricule + '\')" class="btn-3d btn-green" style="padding:5px 9px; font-size:.7rem;">✎</button> ' +
+      '<button onclick="toggleUserActive(\'' + u.matricule + '\')" class="btn-3d btn-orange" style="padding:5px 9px; font-size:.7rem;">' + (u.active ? '⛔' : '✅') + '</button> ' +
+      '<button onclick="deleteUser(\'' + u.matricule + '\')" class="btn-3d btn-red" style="padding:5px 9px; font-size:.7rem;">🗑️</button></td>' +
+      '</tr>';
+  });
+  html += '</tbody></table>';
+  container.innerHTML = html;
+  document.getElementById('us-count-tag').textContent = list.length + ' compte(s) affiché(s) sur ' + (db.users || []).length + ' au total.';
+}
+function renderMatrixTable(){
+  const container = document.getElementById('matrix-table-container');
+  if (!container) return;
+  const perms = ['records:read','records:create','records:update','records:delete','records:export','users:manage','params:manage','audit:read'];
+  const permLabels = {'records:read':'Lecture dossiers','records:create':'Création','records:update':'Modification','records:delete':'Suppression','records:export':'Export','users:manage':'Gestion utilisateurs','params:manage':'Référentiels','audit:read':'Journal d\'audit'};
+  let html = '<table class="data-table"><thead><tr><th>Rôle</th>' + perms.map(p => '<th>' + permLabels[p] + '</th>').join('') + '</tr></thead><tbody>';
+  ROLES.forEach(role => {
+    html += '<tr><td><strong>' + esc(role) + '</strong></td>' + perms.map(p => {
+      const ok = (ROLE_PERMISSIONS[role] || []).includes(p);
+      return '<td style="text-align:center;">' + (ok ? '<span style="color:var(--green-main); font-weight:700;">✔</span>' : '<span style="color:#ccc;">—</span>') + '</td>';
+    }).join('') + '</tr>';
+  });
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+// ===================== PARAMETRES / REFERENTIELS =====================
+const PARAM_LABELS = { departements:'Départements', secteurs:"Secteurs d'activité", motifs:'Motifs de contrôle', statuts:'Statuts de mission', chefsMission:'Chefs de mission' };
+function renderParametres(){
+  const container = document.getElementById('referentiels-container');
+  const editable = can('params:manage');
+  let html = '';
+  Object.keys(PARAM_LABELS).forEach(key => {
+    const values = db.params[key] || [];
+    html += '<div class="form-section" style="margin-bottom:0;">' +
+      '<h2>' + PARAM_LABELS[key] + ' <span style="font-weight:400; font-size:.75rem; color:#888;">(' + values.length + ' valeur(s))</span></h2>' +
+      (editable ? '<div style="display:flex; gap:.5rem; margin-bottom:.9rem;"><input type="text" id="new-'+key+'" class="input-3d" placeholder="Ajouter une valeur..."><button onclick="addParam(\''+key+'\')" class="btn-3d btn-green" style="white-space:nowrap;">➕ Ajouter</button></div>' : '') +
+      '<div>' + values.map((v,i) => '<span class="tag-chip">' + esc(v) + (editable ? ' <button onclick="delParam(\''+key+'\','+i+')">×</button>' : '') + '</span>').join('') + '</div>' +
+      '</div>';
+  });
+  container.innerHTML = html;
+
+  const sauvBtns = document.getElementById('tab-sauvegarde');
+  if (sauvBtns) sauvBtns.querySelectorAll('button, label.btn-3d').forEach(el => {
+    el.style.opacity = editable ? '1' : '.45';
+    el.style.pointerEvents = editable ? '' : 'none';
+  });
+  const licBtn = document.getElementById('licence-tab-code');
+  if (licBtn){
+    licBtn.disabled = !editable;
+    const licParent = licBtn.closest('div');
+    if (licParent) licParent.style.opacity = editable ? '1' : '.45';
+  }
+  if (!editable){
+    const note = document.getElementById('params-readonly-note');
+    if (!note){
+      document.querySelector('#section-parametres .section-title').insertAdjacentHTML('afterend',
+        '<div id="params-readonly-note" style="background:#fff3e0; border:1px solid #ffcc80; color:#8a5300; border-radius:10px; padding:8px 14px; font-size:.76rem; margin-bottom:1rem;">🔒 Consultation seule — la modification des référentiels, de la sauvegarde et de l\'abonnement est réservée au profil Administrateur.</div>');
+    }
+  }
+}
+function addParam(key){
+  if (!can('params:manage')){ showToast('Action réservée au profil Administrateur.', 'error'); return; }
+  const input = document.getElementById('new-' + key);
+  const val = input.value.trim();
+  if (!val) return;
+  db.params[key].push(val);
+  audit('PARAMETRE', 'Ajout ' + PARAM_LABELS[key] + ' : ' + val);
+  saveDB();
+  initAllReferenceSelects();
+  renderParametres();
+  showToast('Valeur ajoutée au référentiel.', 'success');
+}
+function delParam(key, i){
+  if (!can('params:manage')){ showToast('Action réservée au profil Administrateur.', 'error'); return; }
+  const val = db.params[key][i];
+  db.params[key].splice(i,1);
+  audit('PARAMETRE', 'Suppression ' + PARAM_LABELS[key] + ' : ' + val);
+  saveDB();
+  initAllReferenceSelects();
+  renderParametres();
+}
+function renderAuditTable(){
+  const container = document.getElementById('audit-table-container');
+  const rows = db.audit || [];
+  if (rows.length === 0){ container.innerHTML = '<div class="empty-state"><div class="icon">🕓</div><p>Aucun événement enregistré.</p></div>'; return; }
+  let html = '<table class="data-table"><thead><tr><th>Date</th><th>Utilisateur</th><th>Profil</th><th>Action</th><th>Détail</th></tr></thead><tbody>';
+  rows.slice(0,100).forEach(r => {
+    html += '<tr><td>'+new Date(r.date).toLocaleString('fr-FR')+'</td><td>'+esc(r.user)+'</td><td>'+esc(r.role)+'</td><td>'+esc(r.action)+'</td><td>'+esc(r.detail)+'</td></tr>';
+  });
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+function exportAudit(){
+  const blob = new Blob([JSON.stringify(db.audit||[], null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'DRCIA-Hambol-journal-audit.json'; a.click();
+}
+function backupData(){
+  if (!can('params:manage')){ showToast('Action réservée au profil Administrateur.', 'error'); return; }
+  const blob = new Blob([JSON.stringify(db, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'DRCIA-Hambol-sauvegarde.json'; a.click();
+  audit('EXPORT', 'Sauvegarde complète des données');
+  showToast('Sauvegarde exportée avec succès.', 'success');
+}
+function restoreData(e){
+  if (!can('params:manage')){ showToast('Action réservée au profil Administrateur.', 'error'); e.target.value=''; return; }
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const parsed = JSON.parse(ev.target.result);
+      if (!parsed.operateurs || !parsed.missions || !parsed.params) throw new Error('format invalide');
+      db = parsed; db.audit = db.audit || []; db.users = (db.users && db.users.length) ? db.users : seedUsers();
+      db.indicateurs = (db.indicateurs && Object.keys(db.indicateurs).length) ? db.indicateurs : seedIndicateurs();
+      saveDB();
+      audit('IMPORT', 'Restauration depuis une sauvegarde');
+      initAllReferenceSelects();
+      showSection('dashboard-home');
+      showToast('Données restaurées avec succès.', 'success');
+    } catch(err){ showToast('Fichier de sauvegarde invalide.', 'error'); }
+  };
+  reader.readAsText(file);
+}
+function resetDemoData(){
+  if (!can('params:manage')){ showToast('Action réservée au profil Administrateur.', 'error'); return; }
+  if (!confirm('Réinitialiser toutes les données avec le jeu de démonstration ? Cette action est irréversible.')) return;
+  const keepUsers = db.users; // les comptes utilisateurs ne sont pas réinitialisés avec les données métier
+  db = defaultDB();
+  db.users = keepUsers;
+  saveDB();
+  audit('RESET', 'Réinitialisation des données de démonstration');
+  initAllReferenceSelects();
+  showSection('dashboard-home');
+  showToast('Données de démonstration réinitialisées.', 'info');
+}
+
+// ===================== INITIALISATION =====================
+function init(){
+  const savedSession = sessionStorage.getItem('drcia_session');
+  if (savedSession){
+    session = JSON.parse(savedSession);
+    if (!licenceActive()){
+      showPaywall();
+      return;
+    }
+    document.getElementById('page-login').classList.remove('active');
+    document.getElementById('page-dashboard').classList.add('active');
+    document.getElementById('who-label').textContent = 'Déconnexion (' + (session.role||'') + ')';
+    initAllReferenceSelects();
+    applyRolePermissions();
+    showSection('dashboard-home');
+    updateTrialBanner();
+    restoreAllDrafts();
+  }
+}
+attachAutosave('operateur', OP_FORM_FIELDS, () => !!opEditId);
+attachAutosave('mission', MS_FORM_FIELDS, () => !!msEditId);
+init();
+</script>
+</body>
+</html>
