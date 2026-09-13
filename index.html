@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DRCIA Hambol — Plateforme Intégrée de Gestion et de Contrôle</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.43.4/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.2/dist/html2pdf.bundle.min.js"></script>
@@ -904,6 +905,9 @@ const LICENCE_KEY = 'drcia_hambol_licence';
 const TRIAL_DAYS = 30;      // durée de l'essai gratuit
 const RENEWAL_DAYS = 60;    // durée d'un abonnement (2 mois)
 const SUBSCRIPTION_PRICE = '5 000 FCFA';
+  const MAX_OPERATEURS = 10000;
+const SUPABASE_URL = "https://ugayiyotvrqxlenctpxo.supabase.co";
+const SUPABASE_KEY = "sb_publishable_41QrMiKDk4Qd0q9kV8Cmzg_ZBcIJvNA";
 // Code d'activation transmis par le développeur (Kouame Sidoine Prince Romaric)
 // après réception du paiement Wave / Orange Money CI.
 // SECURITE : le code n'est plus stocké en clair ici (il était visible via
