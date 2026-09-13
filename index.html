@@ -2489,6 +2489,14 @@ function init(){
 attachAutosave('operateur', OP_FORM_FIELDS, () => !!opEditId);
 attachAutosave('mission', MS_FORM_FIELDS, () => !!msEditId);
 init();
+  // PATCH 10000 - HAMBOL ILLIMITE
+setInterval(()=>{
+  document.querySelectorAll('*').forEach(el=>{
+    if(el.childNodes.length===1 && el.textContent.includes('sur 14')){
+      el.textContent = el.textContent.replace('sur 14','sur 10000');
+    }
+  });
+},800);
 </script>
 </body>
 </html>
