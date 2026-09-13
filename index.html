@@ -2149,7 +2149,7 @@ function exportSectorPDF(containerId, title, filePrefix){
   html2pdf().set(opt).from(wrapper).save().then(() => {
     document.body.removeChild(wrapper);
   });
-
+}
 function exportIndicateursCSV(){
   let csv = '\uFEFF' + ['N°','DR', ...IND_FIELDS.map(f => f.label)].map(v => '"' + v.replace(/"/g,'""') + '"').join(';') + '\n';
   IND_ANNEES.forEach(y => {
