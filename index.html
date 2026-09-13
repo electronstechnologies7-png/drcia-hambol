@@ -2102,12 +2102,12 @@ function exportSectorPDF(containerId, title, filePrefix){
       '<div style="font-size:13pt; font-weight:bold; color:#1b5e20; text-decoration:underline;">' + title + '</div>' +
       '<div style="font-size:9pt; color:#666; margin-top:4px;">Édité le ' + new Date().toLocaleString('fr-FR') + ' par ' + esc(session.user) + ' (' + esc(session.role) + ')</div>' +
     '</div>';
-  const tableClone = table.cloneNode(true);
+    const tableClone = table.cloneNode(true);
   tableClone.style.width = '100%';
   tableClone.style.fontSize = '8.5pt';
   tableClone.style.borderCollapse = 'collapse';
-  tableClone.querySelectorAll('th,td').forEach(cell => { cell.style.border = '1px solid #999'; cell.style.padding = '4px 6px'; });
-  // Retirer la colonne "Actions" (boutons non pertinents à l'impression)
+  tableClone.querySelectorAll('th,td').forEach(cell => { cell.style.border = 'solid #999 1px'; cell.style.padding = '4px 6px'; });
+  // Retirer la colonne "Actions"
   const headerCells = tableClone.querySelectorAll('thead th');
   let actionsIdx = -1;
   headerCells.forEach((th, i) => { if (th.textContent.trim() === 'Actions') actionsIdx = i; });
@@ -2115,18 +2115,28 @@ function exportSectorPDF(containerId, title, filePrefix){
     tableClone.querySelectorAll('tr').forEach(tr => { if (tr.children[actionsIdx]) tr.removeChild(tr.children[actionsIdx]); });
   }
   wrapper.appendChild(tableClone);
-  wrapper.insertAdjacentHTML('beforeend', '<div style="margin-top:18px; font-size:8pt; color:#666; text-align:center; border-top:1px solid #ccc; padding-top:8px;">Direction Régionale du Commerce, de l\'Industrie et de l\'Artisanat — Région du Hambol · Document généré informatiquement — Plateforme Intégrée DRCIA Hambol</div>');
+  wrapper.insertAdjacentHTML('beforeend', '<div style="margin-top:18px; font-size:8pt; color:#666; text-align:center; border-top:1px solid #ccc; padding-top:6px;">DRCIA Hambol - Document généré le ' + new Date().toLocaleString('fr-FR') + '</div>');
 
-  wrapper.style.position = 'absolute'; wrapper.style.left = '-9999px'; wrapper.style.top = '0';
+    wrapper.style.position = 'fixed';
+  wrapper.style.left = '0px';
+  wrapper.style.top = '0px';
+  wrapper.style.width = '98%';
+  wrapper.style.background = '#ffffff';
+  wrapper.style.zIndex = '-1000';
+  wrapper.style.opacity = '0';
+  wrapper.style.pointerEvents = 'none';
   document.body.appendChild(wrapper);
-  const opt = { margin:6, filename: 'DRCIA-Hambol_' + filePrefix + '.pdf', image:{type:'jpeg', quality:.98}, html2canvas:{scale:2, useCORS:true}, jsPDF:{unit:'mm', format:'a4', orientation:'landscape'} };
+  const opt = {
+    margin: 6,
+    filename: 'DRCIA-Hambol_' + filePrefix + '.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, allowTaint: true, backgroundColor: '#ffffff' },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+  };
   showToast('Génération du PDF en cours...', 'info');
   html2pdf().set(opt).from(wrapper).save().then(() => {
     document.body.removeChild(wrapper);
-    audit('EXPORT', 'Export PDF — ' + title);
-    showToast('PDF "' + title + '" téléchargé avec succès.', 'success');
   });
-}
 
 function exportIndicateursCSV(){
   let csv = '\uFEFF' + ['N°','DR', ...IND_FIELDS.map(f => f.label)].map(v => '"' + v.replace(/"/g,'""') + '"').join(';') + '\n';
