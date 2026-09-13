@@ -2046,14 +2046,19 @@ function renderIndicateursTable(){
 // l'écran (donc déjà filtrées par recherche ET par la portée des droits de
 // l'utilisateur connecté — un agent sans vue globale n'exporte jamais que
 // ses propres saisies).
-function csvDownload(filename, rows){
-  const csv = '\uFEFF' + rows.map(row => row.map(v => '"' + String(v ?? '').replace(/"/g,'""') + '"').join(';')).join('\n');
-  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
+ function csvDownload(filename, rows){
+  let s='\uFEFFsep=;\n';
+  s+=rows.map(r=>r.map(c=>{
+    let x=c==null?'':String(c).replace(/"/g,'""');
+    return '"'+x+'"';
+  }).join(';')).join('\n');
+  let b=new Blob([s],{type:'text/csv;charset=utf-8;'});
+  let u=URL.createObjectURL(b);
+  let a=document.createElement('a');
+  a.href=u;a.download=filename;
+  document.body.appendChild(a);a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(u);
 }
 function exportOperateursCSV(){
   const search = document.getElementById('search-op').value.toLowerCase();
