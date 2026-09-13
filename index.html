@@ -2046,27 +2046,12 @@ function renderIndicateursTable(){
 // l'écran (donc déjà filtrées par recherche ET par la portée des droits de
 // l'utilisateur connecté — un agent sans vue globale n'exporte jamais que
 // ses propres saisies).
- function csvDownload(f,r){
-var B=String.fromCharCode(65279);
-var S=B+"sep=;\n";
-S+=r.map(function(a){
-return a.map(function(c){
+ return a.map(function(c){
 var x=c==null?"":String(c);
-x=x.replace(/"/g,'""');
-return String.fromCharCode(34)+x+String.fromCharCode(34);
+var Q=String.fromCharCode(34);
+x=x.split(Q).join(Q+Q);
+return Q+x+Q;
 }).join(";");
-}).join("\n");
-var b=new Blob([S],{type:"text/csv"});
-var u=URL.createObjectURL(b);
-var e=document.createElement("a");
-e.href=u;
-e.download=f;
-document.body.appendChild(e);
-e.click();
-e.remove();
-URL.revokeObjectURL(u);
-}
-function exportOperateursCSV(){
   const search = document.getElementById('search-op').value.toLowerCase();
   const deptFilter = document.getElementById('filter-op-dept').value;
   let list = db.operateurs;
