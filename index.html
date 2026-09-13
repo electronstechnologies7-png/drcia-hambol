@@ -2040,29 +2040,45 @@ function renderIndicateursTable(){
   html += '</tbody></table>';
   container.innerHTML = html;
 }
-
-// ===================== EXPORTS PAR SECTEUR (EXCEL / PDF) =====================
-// Chaque export ne porte que sur les données actuellement visibles à
-// l'écran (donc déjà filtrées par recherche ET par la portée des droits de
-// l'utilisateur connecté — un agent sans vue globale n'exporte jamais que
-// ses propres saisies).
- return a.map(function(c){
-var x=c==null?"":String(c);
+// ==================== EXPORTS PAR SECTEUR (EXCEL / PDF) =====================
+function csvDownload(f,r){
 var Q=String.fromCharCode(34);
+var B=String.fromCharCode(65279);
+var L=[];
+for(var i=0;i<r.length;i++){
+var a=r[i];
+var o=[];
+for(var j=0;j<a.length;j++){
+var c=a[j];
+var x=c==null?"":String(c);
 x=x.split(Q).join(Q+Q);
-return Q+x+Q;
-}).join(";");
-  const search = document.getElementById('search-op').value.toLowerCase();
-  const deptFilter = document.getElementById('filter-op-dept').value;
-  let list = db.operateurs;
-  if (!hasGlobalView() && ['Agent de saisie','Contrôleur'].includes(session.role)) list = list.filter(o => o.createdBy === session.user);
-  if (search) list = list.filter(o => (o.nom+' '+o.prenom+' '+o.numCni+' '+o.activite+' '+o.localite).toLowerCase().includes(search));
-  if (deptFilter) list = list.filter(o => o.departement === deptFilter);
-  const rows = [['N° CNI','Nom','Prénom','Sexe','Nationalité','Département','Localité','Activité','Téléphone']];
-  list.forEach(o => rows.push([o.numCni,o.nom,o.prenom,o.sexe,o.nationalite,o.departement,o.localite,o.activite,o.telephone||'']));
-  csvDownload('DRCIA-Hambol_Operateurs.csv', rows);
-  audit('EXPORT', 'Export Excel (CSV) des opérateurs — ' + list.length + ' ligne(s)');
-  showToast('Export Excel des opérateurs généré (' + list.length + ' ligne(s)).', 'success');
+o.push(Q+x+Q);
+}
+L.push(o.join(";"));
+}
+var S=B+"sep=;\n"+L.join("\n");
+var b=new Blob([S],{type:"text/csv;charset=utf-8;"});
+var u=URL.createObjectURL(b);
+var e=document.createElement("a");
+e.href=u;
+e.download=f;
+document.body.appendChild(e);
+e.click();
+e.remove();
+URL.revokeObjectURL(u);
+}
+function exportOperateursCSV(){
+const search = document.getElementById('search-op').value.toLowerCase();
+const deptFilter = document.getElementById('filter-op-dept').value;
+let list = db.operateurs;
+if (!hasGlobalView() && ['Agent de saisie','Contrôleur'].includes(session.role)) list = list.filter(o => o.createdBy === session.user);
+if (search) list = list.filter(o => (o.nom+' '+o.prenom+' '+o.numCni+' '+o.activite+' '+o.localite).toLowerCase().includes(search));
+if (deptFilter) list = list.filter(o => o.departement === deptFilter);
+const rows = [['N° CNI','Nom','Prénom','Sexe','Nationalité','Département','Localité','Activité','Téléphone']];
+list.forEach(o => rows.push([o.numCni,o.nom,o.prenom,o.sexe,o.nationalite,o.departement,o.localite,o.activite,o.telephone||'']));
+csvDownload('DRCIA-Hambol_Operateurs.csv', rows);
+audit('EXPORT', 'Export Excel des opérateurs — ' + list.length + ' ligne(s)');
+showToast('Export Excel des opérateurs généré (' + list.length + ' ligne(s)).', 'success');
 }
 function exportMissionsCSV(){
   const search = document.getElementById('search-ms').value.toLowerCase();
